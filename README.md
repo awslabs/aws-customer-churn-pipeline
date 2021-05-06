@@ -30,11 +30,11 @@ Right now this is an Alpha and should not be used for production.
 
 Losing customers costs money. Discovering customers likely to leave, and then stopping them from churning, saves money. Wouldn’t it be great if you could hold onto customers longer, maximizing their lifetime revenue? Wouldn’t it be even better if this could be done with machine learning scaleably?
 
-Well, guess what - you can!
+Well guess what - now you can!
 
 ![wow](https://media.giphy.com/media/LyrAHvPodQZLW/giphy.gif)
 
-In this blog post, you will deploy an End to End Customer Churn Prediction solution using AWS services. You will build automated training and inference pipelines with [Amazon SageMaker](https://aws.amazon.com/sagemaker/) and [AWS Step Functions](https://aws.amazon.com/step-functions/?step-functions.sort-by=item.additionalFields.postDateTime&step-functions.sort-order=desc) for Machine Learning churn detection. Aside from identifying customers that are most likely to churn, on demand capabilities, run as ETL procedures, support preprocessing, and have explainability all baked in. Templated with infrastructure as code, you can then reapply and scale this solution to different datasets. The churn prediction solution serves as a reference implementation, that makes it easier for organisations of all sizes to implement an end-to-end training and inference pipeline.
+In this blog post, you will deploy an End to End Customer Churn Prediction solution using AWS services. You will build automated training and inference pipelines with [Amazon SageMaker](https://aws.amazon.com/sagemaker/) and [AWS Step Functions](https://aws.amazon.com/step-functions/?step-functions.sort-by=item.additionalFields.postDateTime&step-functions.sort-order=desc) for Machine Learning churn detection. Aside from identifying customers that are most likely to churn, on demand capabilities, run as ETL procedures, support preprocessing, and have explainability all baked in. This solution is templated with infrastructure as code enabling it to be scaled and reapplied. The churn prediction solution serves as a reference implementation, that makes it easier for organisations of all sizes to implement an end-to-end training and inference pipeline.
 
 This solution supports data ingestion, training/retraining, and inference by using [Amazon Lambda](https://aws.amazon.com/lambda/) calls to trigger pipeline runs. It makes use of Amazon [S3](https://aws.amazon.com/s3/) integrated directly with Amazon SageMaker and AWS Step Functions backed by, [Amazon Glue](https://aws.amazon.com/glue/?nc2=type_a&whats-new-cards.sort-by=item.additionalFields.postDateTime&whats-new-cards.sort-order=desc) and [Amazon Athena](https://aws.amazon.com/athena/?nc2=type_a&whats-new-cards.sort-by=item.additionalFields.postDateTime&whats-new-cards.sort-order=desc). This allows for the ability to automate runs, experiment rapidly, deploy quickly and easily incorporate expanding data sizes at the Tera-byte level.
 
@@ -85,7 +85,7 @@ Specifically, this script will create:
 5. Deploy the AWS Step Functions pipelines for training and inference. This is done based on the above S3 location and creates multiple Amazon Lambda and Amazon SageMaker jobs.
 6. Writes the stack name and region to `delete_resources.sh`, so that this script can later be used to tear down the AWS infrastructure
 
-Once the the standup completes, your CloudFormation console should look like the below, with all stacks showing green.
+Once the standup completes, your CloudFormation console should look like the below, with all stacks showing green.
 
 ![AllGreen](images/CFNAllGreen.png)
 
@@ -103,7 +103,7 @@ Before diving deep into the steps for these workflows provide and their Continuo
 
 ## The Automated Training Pipeline
 
-Both pipelines are designed to run as needed or scheduled, with the ability to automate the deployment of packaged code so that there is little effort and risk in deployment. This section and the next will explain how each pipeline works, brining you one step closer to a fully automated machine learning churn pipeline.
+Both pipelines are designed to run as needed or scheduled, with the ability to automate the deployment of packaged code so that there is little effort and risk in deployment. This section and the next will explain how each pipeline works, bringing you one step closer to a fully automated machine learning churn pipeline.
 
 The training pipeline uses Amazon Lambdas with Amazon SageMaker to output a fully trained, validated and optimized churn model to Amazon S3 in seven steps.
 
@@ -175,7 +175,7 @@ Again, this step uses SageMaker configurations from `pipeline.yaml` to run SageM
 
 <img src="images/feature_importance.png" alt="drawing" style="width:350px;"/>
 
-Explainability metrics show how each features affects customer churn. Incorporating techniques like [SHAP](https://github.com/slundberg/shap), enables the ability to explain the model as a whole and, more importantly, the ability to look at how scores are determined on an individual customer basis.
+Explainability metrics show how each feature affects customer churn. Incorporating techniques like [SHAP](https://github.com/slundberg/shap), enables the ability to explain the model as a whole and, more importantly, the ability to look at how scores are determined on an individual customer basis.
 
 ### Step 5: SageMaker Step Save Model
 
@@ -251,10 +251,10 @@ To clean up the resources to prevent further charges run the following file:
 
 This will tear down the CloudFormation stacks for the Churn Pipeline. To confirm that everything is deleted, go to your CloudFormation console. The console should now be absent of **the** all related stacks.
 
-![EmptyCFN](images/EmpyCloudFormation.png)Note that since this processes did not generate the S3 bucket, all files will from running the pipelines will still be there. If you don’t want to keep the files, you’ll need to empty the bucket and delete it separately.
+![EmptyCFN](images/EmpyCloudFormation.png)Note that since this processes did not generate the S3 bucket, all files from running the pipelines will still be there. If you don’t want to keep the files, you’ll need to empty the bucket and delete it separately.
 
 ### Conclusion
 
-In this blog post you learned how deploy an End to End churn prediction pipeline using AWS Services. You first stood up the necessary resources for data processing and workflows making use of S3, Amazon Athena, Amazon Glue, AWS Step Functions and Amazon SageMaker. You then a training workflow for churn prediction, complete with feature preprocessing, hyper-parameter tuning, model explainability and evaluation. Lastly, you ran the inference workflow using the trained model to generate batch churn predictions on unseen data. For both workflow steps, you invoked Amazon Lambda to automatically deploy changes. Automated deployment, combined with GitHub Actions, makes this a full-fledged CI/CD churn prediction solution. You are now armed with enough information to take this solution and expand to your own data!
+In this blog post you learned how deploy an End to End churn prediction pipeline using AWS Services. You first stood up the necessary resources for data processing and workflows making use of S3, Amazon Athena, Amazon Glue, AWS Step Functions and Amazon SageMaker. You then ran a training workflow for churn prediction, complete with feature preprocessing, hyper-parameter tuning, model explainability and evaluation. Lastly, you ran the inference workflow using the trained model to generate batch churn predictions on unseen data. For both workflow steps, you invoked Amazon Lambda to automatically deploy changes. Automated deployment, combined with GitHub Actions, makes this a full-fledged CI/CD churn prediction solution. You are now armed with enough information to take this solution and expand to your own data!
 
-This blog is great for for getting started with an automated churn prediction solution. That said, there is far more that can be done to bolster the pipelines. For example, data integrity checks, like with[PyDeequ](https://github.com/awslabs/python-deequ) or [Amazon SageMaker Model Monitor](https://sagemaker.readthedocs.io/en/stable/amazon_sagemaker_model_monitoring.html)are possible to add into the pipeline to further model integrity. It’s possible to swap out the workload to work on other forms of data like text by changing out the container images and database portion. Moreover, it’s possible to completely automated by using [AWS Code Pipeline](https://aws.amazon.com/codepipeline/) or similar serves that will build all the infrastructure and run both workflows triggered by a single commit.
+This blog is great for getting started with an automated churn prediction solution. That said, there is far more that can be done to bolster the pipelines. For example, data integrity checks, like with[PyDeequ](https://github.com/awslabs/python-deequ) or [Amazon SageMaker Model Monitor](https://sagemaker.readthedocs.io/en/stable/amazon_sagemaker_model_monitoring.html)are possible to add into the pipeline to further model integrity. It’s possible to swap out the workload to work on other forms of data like text by changing out the container images and database portion. Moreover, it’s possible to completely automate by using [AWS Code Pipeline](https://aws.amazon.com/codepipeline/) or similar serves that will build all the infrastructure and run both workflows triggered by a single commit.
