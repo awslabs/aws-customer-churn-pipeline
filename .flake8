@@ -1,0 +1,17 @@
+
+[flake8]
+max-line-length = 88
+max-complexity = 10
+ignore = E203, W503, E231, E402
+exclude =
+    .git
+    __pycache__
+    .*_cache
+    examples/
+    .tox
+    data/
+    notebooks/
+    docs/
+    models/
+    venv/
+    .venv/
