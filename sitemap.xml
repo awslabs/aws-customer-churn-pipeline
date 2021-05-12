@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url>
-     <loc>https://awslabs.github.io/amazon-sagemaker-customer-churn-pipeline/index.html</loc>
+     <loc>https://awslabs.github.io/aws-customer-churn-pipeline/index.html</loc>
      <lastmod>2021-05-12</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
-     <loc>https://awslabs.github.io/amazon-sagemaker-customer-churn-pipeline/training/preporcessing.html</loc>
+     <loc>https://awslabs.github.io/aws-customer-churn-pipeline/training/preporcessing.html</loc>
      <lastmod>2021-05-12</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
-     <loc>https://awslabs.github.io/amazon-sagemaker-customer-churn-pipeline/training/hyperparameter_tuning.html</loc>
+     <loc>https://awslabs.github.io/aws-customer-churn-pipeline/training/hyperparameter_tuning.html</loc>
      <lastmod>2021-05-12</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
-     <loc>https://awslabs.github.io/amazon-sagemaker-customer-churn-pipeline/training/model_training.html</loc>
+     <loc>https://awslabs.github.io/aws-customer-churn-pipeline/training/model_training.html</loc>
      <lastmod>2021-05-12</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
-     <loc>https://awslabs.github.io/amazon-sagemaker-customer-churn-pipeline/training/save_model.html</loc>
+     <loc>https://awslabs.github.io/aws-customer-churn-pipeline/training/save_model.html</loc>
      <lastmod>2021-05-12</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
-     <loc>https://awslabs.github.io/amazon-sagemaker-customer-churn-pipeline/training/model_evaluation.html</loc>
+     <loc>https://awslabs.github.io/aws-customer-churn-pipeline/training/model_evaluation.html</loc>
      <lastmod>2021-05-12</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
-     <loc>https://awslabs.github.io/amazon-sagemaker-customer-churn-pipeline/inference/preprocessing.html</loc>
+     <loc>https://awslabs.github.io/aws-customer-churn-pipeline/inference/preprocessing.html</loc>
      <lastmod>2021-05-12</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
-     <loc>https://awslabs.github.io/amazon-sagemaker-customer-churn-pipeline/inference/batch_transform.html</loc>
+     <loc>https://awslabs.github.io/aws-customer-churn-pipeline/inference/batch_transform.html</loc>
      <lastmod>2021-05-12</lastmod>
      <changefreq>daily</changefreq>
     </url>
