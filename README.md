@@ -28,7 +28,9 @@ Losing customers costs money. Discovering customers likely to leave, and then st
 
 Well guess what - now you can!
 
-![wow](https://media.giphy.com/media/LyrAHvPodQZLW/giphy.gif)
+![wow](https://media.giphy.com/media/QCJtpCu4urlehQEZvg/giphy.gif)
+
+*Source: Kinjiro www.brandonlepine.art/, courtesy [GIPHY](https://giphy.com/)*
 
 In this blog post, you will deploy an End to End Customer Churn Prediction solution using AWS services. You will build automated training and inference pipelines with [Amazon SageMaker](https://aws.amazon.com/sagemaker/) and [AWS Step Functions](https://aws.amazon.com/step-functions/?step-functions.sort-by=item.additionalFields.postDateTime&step-functions.sort-order=desc) for Machine Learning churn detection. Aside from identifying customers that are most likely to churn, on demand capabilities, run as ETL procedures, support preprocessing, and have explainability all baked in. This solution is templated with infrastructure as code enabling it to be scaled and reapplied. The churn prediction solution serves as a reference implementation, that makes it easier for organisations of all sizes to implement an end-to-end training and inference pipeline.
 
