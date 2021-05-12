@@ -53,9 +53,9 @@ def main(args):
     """
 
     model_path = os.path.join("/opt/ml/processing/model", "model.tar.gz")
-    
+
     logger.info(f"Extracting model from path: {model_path}")
-    
+
     with tarfile.open(model_path) as tar:
         tar.extractall(path=".")
     logger.info("Loading model")
