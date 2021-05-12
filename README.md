@@ -2,10 +2,6 @@
 
 _A python package for deploying an end to end customer churn prediction pipeline on AWS_
 
-## Alpha Notice
-
-Right now this is an Alpha and should not be used for production.
-
 ## Tutorial
 
 [notebook](notebook/Sample_Churn_Data_ETL.ipynb)
