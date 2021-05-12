@@ -58,6 +58,7 @@ target_col = "churn?"
 class_labels = ["True.", "False."]
 
 
+# TO DO: more elegant way of doing this
 def split_col_dtype(col_type: dict, target_label: str) -> Tuple[List[str], List[str]]:
     """Split columns into categorical and numerical lists
 
