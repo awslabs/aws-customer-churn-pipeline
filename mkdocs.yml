@@ -1,7 +1,7 @@
 site_name: Customer Churn Pipeline Docs
 extra_css: [style.css]
-repo_url: https://github.com/awslabs/amazon-sagemaker-customer-churn-pipeline
-site_url: https://awslabs.github.io/amazon-sagemaker-customer-churn-pipeline/
+repo_url: https://github.com/awslabs/aws-customer-churn-pipeline
+site_url: https://awslabs.github.io/aws-customer-churn-pipeline/
 site_description: A python package for deploying an end to end customer churn prediction pipeline on AWS
 site_author: Baichuan Sun, Charles Frenzel, Yin Song
 use_directory_urls: false
