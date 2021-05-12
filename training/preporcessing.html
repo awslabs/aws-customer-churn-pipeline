@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Baichuan Sun, Charles Frenzel, Yin Song">
+  <link rel="canonical" href="https://awslabs.github.io/amazon-sagemaker-customer-churn-pipeline/training/preporcessing.html">
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Preprocessing - Customer Churn Pipeline Docs</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+  <link href="../style.css" rel="stylesheet" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Preprocessing";
+    var mkdocs_page_input_path = "training/preporcessing.md";
+    var mkdocs_page_url = "/amazon-sagemaker-customer-churn-pipeline/training/preporcessing.html";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Customer Churn Pipeline Docs</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <p class="caption"><span class="caption-text">Home</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../index.html">Index</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Training Pipeline</span></p>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="preporcessing.html">Preprocessing</a>
+    <ul class="current">
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="hyperparameter_tuning.html">HyperParameter Tuning</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="model_training.html">Training</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="save_model.html">Model Persistence</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="model_evaluation.html">Evaluation</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Inference Pipeline</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../inference/preprocessing.html">Preprocessing</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../inference/batch_transform.html">Batch Inference</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Customer Churn Pipeline Docs</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Training Pipeline &raquo;</li>
+        
+      
+    
+    <li>Preprocessing</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/awslabs/amazon-sagemaker-customer-churn-pipeline/edit/master/docs/training/preporcessing.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="training-preprocessing-step">Training Preprocessing Step<a class="headerlink" href="#training-preprocessing-step" title="Permanent link">&para;</a></h1>
+<p>An Amazon SageMaker preprocessing job is run on data queried directly from the Amazon Athena table making use of <a href="https://github.com/aws/sagemaker-scikit-learn-container">SageMaker’s Scikit Learn container.</a></p>
+<p>This step is run using <code>scripts/preporcessing.py</code> in the following order:</p>
+<ol>
+<li>Data is read from the Athena table using <a href="https://github.com/awslabs/aws-data-wrangler">awswrangler</a></li>
+<li>Data is split into training and validation datasets via a randomized split</li>
+<li>Missing values are imputed and categorical values are one hot-encoded</li>
+<li>The split and preprocessed datasets are then written back to S3 as csv files</li>
+<li>The preprocessor is saved for use in the inference pipeline</li>
+</ol>
+<p>The preprocessing scripts and Cloud Formation template <code>pipeline.yaml</code>’s Step Functions arguments are update-able.
+For example, the entry point arguments for the container are set in the CloudFormation as:</p>
+<div class="codehilite"><pre><span></span><code>&quot;ContainerArguments&quot;: [
+      &quot;--database&quot;,
+      &quot;<span class="cp">${</span><span class="n">AthenaDatabaseName</span><span class="cp">}</span>&quot;,
+      &quot;--region&quot;,
+      &quot;<span class="cp">${</span><span class="n">AWS</span><span class="p">::</span><span class="n">Region</span><span class="cp">}</span>&quot;,
+      &quot;--table&quot;,
+      &quot;train&quot;,
+      &quot;--train-test-split-ratio&quot;,
+      &quot;0.2&quot;],
+</code></pre></div>
+
+<p>The database name <code>{AthendaDatabaseName}</code> is passed in as the name of your stack with <code>-db</code> attached. Region is set from the variable you passed to <code>standup.sh</code>. The table name defaults to the training data name, in this case, “train”. Lastly, the random split between train and test is set here as a default, with 25% the data held out for testing.</p>
+<p>For this blog post, you will leave <code>pipeline.yaml</code>’s settings as is. Keep in mind, it’s possible to change all of these configurations based on your data.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="hyperparameter_tuning.html" class="btn btn-neutral float-right" title="HyperParameter Tuning">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../index.html" class="btn btn-neutral" title="Index"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+      <p>Copyright &copy; 2021</p>
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/awslabs/amazon-sagemaker-customer-churn-pipeline/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../index.html" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="hyperparameter_tuning.html" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

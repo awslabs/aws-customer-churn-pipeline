@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Baichuan Sun, Charles Frenzel, Yin Song">
+  <link rel="canonical" href="https://awslabs.github.io/amazon-sagemaker-customer-churn-pipeline/inference/batch_transform.html">
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Batch Inference - Customer Churn Pipeline Docs</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+  <link href="../style.css" rel="stylesheet" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Batch Inference";
+    var mkdocs_page_input_path = "inference/batch_transform.md";
+    var mkdocs_page_url = "/amazon-sagemaker-customer-churn-pipeline/inference/batch_transform.html";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Customer Churn Pipeline Docs</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <p class="caption"><span class="caption-text">Home</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../index.html">Index</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Training Pipeline</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../training/preporcessing.html">Preprocessing</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../training/hyperparameter_tuning.html">HyperParameter Tuning</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../training/model_training.html">Training</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../training/save_model.html">Model Persistence</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../training/model_evaluation.html">Evaluation</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Inference Pipeline</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="preprocessing.html">Preprocessing</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="batch_transform.html">Batch Inference</a>
+    <ul class="current">
+    </ul>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Customer Churn Pipeline Docs</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Inference Pipeline &raquo;</li>
+        
+      
+    
+    <li>Batch Inference</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/awslabs/amazon-sagemaker-customer-churn-pipeline/edit/master/docs/inference/batch_transform.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h2 id="inference-batch-transform">Inference: Batch Transform<a class="headerlink" href="#inference-batch-transform" title="Permanent link">&para;</a></h2>
+<p>Now that the inference dataset is in the proper format you can get churn predictions.
+This next step make use of <a href="https://docs.aws.amazon.com/sagemaker/latest/dg/batch-transform.html">Amazon SageMaker’s Batch Transform</a> feature to directly run the inference as a batch job and then writes the data results to S3 into the prefix <code>/data/inference_result</code>.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="preprocessing.html" class="btn btn-neutral" title="Preprocessing"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+      <p>Copyright &copy; 2021</p>
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/awslabs/amazon-sagemaker-customer-churn-pipeline/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="preprocessing.html" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
