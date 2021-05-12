@@ -25,6 +25,10 @@ push:  ## push code with targets
 
 tox: ##Run tox
 	python -m tox
+	
+docs: #mkdocs 
+	mkdocs build
+	mkdocs gh-deploy
 
 install:
 	pip install rich
