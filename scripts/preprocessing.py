@@ -188,7 +188,7 @@ if __name__ == "__main__":
     parser.add_argument("--region", type=str, required=True)
     parser.add_argument("--table", type=str, required=True)
     parser.add_argument("--train-test-split-ratio", type=float, default=0.25)
-    parser.add_argument("--randomd-state", type=float, default=123)
+    parser.add_argument("--random-state", type=float, default=123)
     args = parser.parse_args()
 
     main(args)
