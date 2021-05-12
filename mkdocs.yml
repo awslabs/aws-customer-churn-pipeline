@@ -1,0 +1,47 @@
+site_name: Customer Churn Pipeline Docs
+extra_css: [style.css]
+repo_url: https://github.com/awslabs/amazon-sagemaker-customer-churn-pipeline
+site_url: https://awslabs.github.io/amazon-sagemaker-customer-churn-pipeline/
+site_description: A python package for deploying an end to end customer churn prediction pipeline on AWS
+site_author: Baichuan Sun, Charles Frenzel, Yin Song
+use_directory_urls: false
+nav:
+  - Home:
+      - Index: index.md
+  - Training Pipeline:
+      - Preprocessing: training/preporcessing.md
+      - HyperParameter Tuning: training/hyperparameter_tuning.md
+      - Training: training/model_training.md
+      - Model Persistence: training/save_model.md
+      - Evaluation: training/model_evaluation.md
+  - Inference Pipeline:
+      - Preprocessing: inference/preprocessing.md
+      - Batch Inference: inference/batch_transform.md
+
+plugins:
+  - mkdocstrings:
+      watch:
+        - scripts
+  - search
+copyright: Copyright &copy; 2021
+theme:
+  name: readthedocs
+  icon:
+    logo: material/library
+  font:
+    text: Ubuntu
+    code: Ubuntu Mono
+  feature:
+    tabs: true
+  palette:
+    primary: indigo
+    accent: blue
+markdown_extensions:
+  - codehilite
+  - pymdownx.inlinehilite
+  - pymdownx.details
+  - pymdownx.tabbed
+  - pymdownx.highlight:
+      use_pygments: true
+  - toc:
+      permalink: true
