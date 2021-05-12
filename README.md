@@ -19,8 +19,12 @@ For more details see the [documentation](https://awslabs.github.io/aws-customer-
 
     # Clean up
     ./delete_resources.sh
-    
 
 ## Notebook Tutorial
 
 [notebook](notebook/Sample_Churn_Data_ETL.ipynb)
+
+## Solution Architecture
+
+<img src="images/arch.png" width="480" height="480" frameBorder="0" class="giphy-embed" allowFullScreen>
+
