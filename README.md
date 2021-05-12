@@ -153,7 +153,7 @@ For example, the entry point arguments for the container are set in the CloudFor
       "0.2"],
 ```
 
-The database name `{AthendaDatabaseName}` is passed in as the name of your stack with `-db` attached. Region is set from the variable you passed to `standup.sh`. The table name defaults to the training data name, in this case, “train”. Lastly, the random split between train and test is set here as a default, with 20% the data held out for testing.
+The database name `{AthendaDatabaseName}` is passed in as the name of your stack with `-db` attached. Region is set from the variable you passed to `standup.sh`. The table name defaults to the training data name, in this case, “train”. Lastly, the random split between train and test is set here as a default, with 25% the data held out for testing.
 
 For this blog post, you will leave `pipeline.yaml`’s settings as is. Keep in mind, it’s possible to change all of these configurations based on your data.
 
