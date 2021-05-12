@@ -26,7 +26,12 @@ push:  ## push code with targets
 tox: ##Run tox
 	python -m tox
 	
-docs: #mkdocs 
+doc-test: ##mkdocs local test
+	python -m pip install mkdocs mkdocstrings
+	mkdocs serve
+
+doc-deploy: ##mkdocs github
+	python -m pip install mkdocs mkdocstrings
 	mkdocs build
 	mkdocs gh-deploy
 
@@ -44,10 +49,6 @@ install-test: install
 
 clean:
 	rm -rf **/.ipynb_checkpoints **/.pytest_cache **/__pycache__ **/**/__pycache__ .ipynb_checkpoints .pytest_cache
-
-doc:
-	python -m pip install mkdocs mkdocstrings
-	mkdocs serve
 
 help: ## Show help message
 	@IFS=$$'\n' ; \
