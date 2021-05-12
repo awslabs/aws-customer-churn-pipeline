@@ -40,7 +40,7 @@ This solution supports data ingestion, training/retraining, and inference by usi
 
 The following architectural diagram illustrates the workflow of the solution:
 
-![arch](images/arch.png)
+![arch](https://github.com/awslabs/aws-customer-churn-pipeline/blob/main/images/arch.png)
 
 The workflow includes the following steps:
 
@@ -57,7 +57,7 @@ Before you get started, you will first need an AWS account setup with credential
 ## A Quick Glimpse at the Data
 
 In this example, you will use a synthetic churn dataset for an imaginary telecommunications company with the outcome `Churn?` flagged as as either `True` (churned) or `False` (did not churn). Features include customer details such as plan and usage information. The churn dataset is publicly available and mentioned in the book [Discovering Knowledge in Data](https://www.amazon.com/dp/0470908742/)) by Daniel T. Larose. It is attributed by the author to the University of California Irvine Repository of Machine Learning Datasets.
-![dataset](images/ChurnData.png) Keep in mind, that this dataset is replaceable with your own so long as the codebase updated to accommodate it.
+![dataset](https://github.com/awslabs/aws-customer-churn-pipeline/blob/main/images/ChurnData.png) Keep in mind, that this dataset is replaceable with your own so long as the codebase updated to accommodate it.
 In other words, if your goal is to reapply this to your data, this post is the first step to getting you there! Read on and you will see how.
 
 ## Launch the Solution
@@ -85,7 +85,7 @@ Specifically, this script will create:
 
 Once the standup completes, your CloudFormation console should look like the below, with all stacks showing green.
 
-![AllGreen](images/CFNAllGreen.png)
+![AllGreen](https://github.com/awslabs/aws-customer-churn-pipeline/blob/main/images/CFNAllGreen.png)
 
 Likewise, if you go to Athena console, you will now see tables for both training and inference.
 
@@ -95,7 +95,7 @@ Note that the name of the database will be based off the S3 Bucket name you assi
 
 Finally, if you go to the Step Functions menu, you will now see two State Machines (or workflows) - one for training and the other inference.
 
-![StateMachines](images/StateMachines.png)
+![StateMachines](https://github.com/awslabs/aws-customer-churn-pipeline/blob/main/images/StateMachines.png)
 
 Before diving deep into the steps for these workflows provide and their Continuous Delivery aspects, let’s quickly review the Continuous Integration setup for the source repository and how it ameliorates this solution further.
 
@@ -105,7 +105,7 @@ Both pipelines are designed to run as needed or scheduled, with the ability to a
 
 The training pipeline uses Amazon Lambdas with Amazon SageMaker to output a fully trained, validated and optimized churn model to Amazon S3 in seven steps.
 
-![TrainingPipeline](images/stepfunctions_graph_train.png)
+![TrainingPipeline](https://github.com/awslabs/aws-customer-churn-pipeline/blob/main/images/stepfunctions_graph_train.png)
 
 Let’s first kick off the training pipeline by invoking Amazon Lambda:
 
@@ -189,13 +189,13 @@ The final step runs a full evaluation on the training and testing data with a re
 
 First, the trained model is loaded directly from its stored S3 URI. It then generates a classification report on the testing data and outputs the results as `evaluation.json` back to S3. Finally, SHAP values and a feature importance plot are output and saved back to S3. Please note, that unlike SageMaker Debugger step in **Step 4 SageMaker Training Step,** these outputs are sent directly to your named S3 bucket and not a SageMaker default bucket elsewhere.
 
-![Evaluation](images/Evaluation.png)
+![Evaluation](https://github.com/awslabs/aws-customer-churn-pipeline/blob/main/images/Evaluation.png)
 
 ## The Automated Inference Pipeline
 
 The inference pipeline uses Amazon SageMaker artefacts generated from the training pipeline to run inference on unseen data and then PUT it back to S3 in two steps.
 
-![InferencePipeline](images/stepfunctions_graph_infer.png)
+![InferencePipeline](https://github.com/awslabs/aws-customer-churn-pipeline/blob/main/images/stepfunctions_graph_infer.png)
 
 ### SageMaker Inference Step Preprocessing
 
@@ -239,7 +239,7 @@ This next step make use of [Amazon SageMaker’s Batch Transform](https://docs.a
 
 Your final output should consist of the churn probability score for each customer:
 
-![Scores](images/ProbabilityScores.png)
+![Scores](https://github.com/awslabs/aws-customer-churn-pipeline/blob/main/images/ProbabilityScores.png)
 
 ## Cleaning Up
 
@@ -249,7 +249,9 @@ To clean up the resources to prevent further charges run the following file:
 
 This will tear down the CloudFormation stacks for the Churn Pipeline. To confirm that everything is deleted, go to your CloudFormation console. The console should now be absent of **the** all related stacks.
 
-![EmptyCFN](images/EmpyCloudFormation.png)Note that since this processes did not generate the S3 bucket, all files from running the pipelines will still be there. If you don’t want to keep the files, you’ll need to empty the bucket and delete it separately.
+![EmptyCFN](https://github.com/awslabs/aws-customer-churn-pipeline/blob/main/images/EmpyCloudFormation.png)Note that since this processes did not generate the S3 bucket, all files will from running the pipelines will still be there. If you don’t want to keep the files, you’ll need to empty the bucket and delete it separately.
+
+Note that since this processes did not generate the S3 bucket, all files from running the pipelines will still be there. If you don’t want to keep the files, you’ll need to empty the bucket and delete it separately.
 
 ### Conclusion
 
