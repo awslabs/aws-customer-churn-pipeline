@@ -1,4 +1,4 @@
-# Customer Churn on AWS
+# Customer Churn Pipeline on AWS
 
 _A python package for deploying an end to end customer churn prediction pipeline on AWS_
 
