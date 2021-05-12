@@ -9,7 +9,7 @@ _A python package for deploying an end to end customer churn prediction pipeline
 ## Getting Started
 
     # Set up the resources
-    ./stand_up.sh
+    ./standup.sh
 
     AWS_REGION=$(aws configure get region)
 
