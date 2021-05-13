@@ -3,7 +3,7 @@
 *A production-focused End to End churn prediction pipeline on AWS*
 
 
-<img src="images/logo.png" width="502" height="132" frameBorder="0">
+<img src="images/logo1.png" width="220" height="57" frameBorder="0">
 
 It provides:
 
