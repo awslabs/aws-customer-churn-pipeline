@@ -24,6 +24,7 @@ It provides:
 - [Quick Start](#quick-start)
 - [Read The Docs](#read-the-docs)
 - [Soution Architecture](#solution-architecture)
+- [Contributing](#contributing)
 
 ## Quick Start
 
@@ -43,9 +44,11 @@ It provides:
 
 ## [Read The Docs](https://awslabs.github.io/aws-customer-churn-pipeline/)
 
-[notebook](notebook/Sample_Churn_Data_ETL.ipynb)
 
 ## Solution Architecture
 
 <img src="images/arch.png" width="480" height="480" frameBorder="0" allowFullScreen>
 
+## Contributing
+
+For how to Contribute [see here.](https://github.com/awslabs/aws-customer-churn-pipeline/blob/main/docs/contributing.md)
