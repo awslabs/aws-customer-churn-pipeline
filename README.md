@@ -2,8 +2,9 @@
 
 *A production-focused End to End churn prediction pipeline on AWS*
 
-
-<img src="images/logo.png" width="321" height="145" class="center">
+<p align="center">
+<img src="images/logo.png" width="321" height="145">
+</p>
 
 It provides:
 
@@ -53,7 +54,9 @@ In addition, check out the blog post [Deploying a Scalable End to End Customer C
 
 ## Solution Architecture
 
-<img src="images/arch.png" width="480" height="480">
+<p align="center">
+<img src="images/arch.png" width="480" height="480" class="centerImage">
+</p>
 
 ## Contributing
 
