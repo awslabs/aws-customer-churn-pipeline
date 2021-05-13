@@ -1,6 +1,6 @@
 # Customer Churn Pipeline on AWS
 
-_A python package for deploying an end to end customer churn prediction pipeline on AWS_
+_A deployment package for a production-ready end to end customer churn prediction pipeline on AWS_
 
 For more details see the [documentation](https://awslabs.github.io/aws-customer-churn-pipeline/index.html)
 
