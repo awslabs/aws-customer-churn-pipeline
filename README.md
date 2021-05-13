@@ -1,7 +1,14 @@
 # Customer Churn Pipeline on AWS
 
-*A production-ready churn prediction pipeline on AWS*
+*A production-focused End to End churn prediction pipeline on AWS*
 
+
+It provides:
+
+- One-click Training and Inference Pipelines for churn prediction
+- Preprocessing, Validation, Hyperparameter tuning, and model Explainability all backed into the pipelines
+- Amazon Athena and AWS Glue backend that allows for the pipeline to scale on demand and with new data
+- End to End Implementation for your own custom churn pipeline
 
 
 > An [AWS Professional Service](https://aws.amazon.com/professional-services/) open source initiative | aws-proserve-opensource@amazon.com
@@ -32,7 +39,7 @@
     # Clean up
     ./delete_resources.sh
 
-## [Read The Docs](https://aws-data-wrangler.readthedocs.io/)
+## [Read The Docs](https://awslabs.github.io/aws-customer-churn-pipeline/)
 
 [notebook](notebook/Sample_Churn_Data_ETL.ipynb)
 
