@@ -1,4 +1,4 @@
-# AWS Customer Churn Pipeline
+# Customer Churn Pipeline on AWS
 
 *A production-focused End to End churn prediction pipeline on AWS*
 
