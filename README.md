@@ -1,7 +1,9 @@
-# Customer Churn Pipeline on AWS
+# AWS Customer Churn Pipeline
 
 *A production-focused End to End churn prediction pipeline on AWS*
 
+
+<img src="images/logo.png" width="502" height="132" frameBorder="0">
 
 It provides:
 
@@ -45,5 +47,5 @@ It provides:
 
 ## Solution Architecture
 
-<img src="images/arch.png" width="480" height="480" frameBorder="0" class="giphy-embed" allowFullScreen>
+<img src="images/arch.png" width="480" height="480" frameBorder="0" allowFullScreen>
 
