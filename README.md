@@ -47,10 +47,13 @@ It provides:
 
 ## [Read The Docs](https://awslabs.github.io/aws-customer-churn-pipeline/)
 
+[Documentation](https://awslabs.github.io/aws-customer-churn-pipeline/)
+
+In addition, check out the blog post [Deploying a Scalable End to End Customer Churn Prediction Solution with AWS](https://towardsdatascience.com/deploying-a-scalable-end-to-end-customer-churn-prediction-solution-with-aws-cbf3536be996)!
 
 ## Solution Architecture
 
-<img src="images/arch.png" width="480" height="480" frameBorder="0" allowFullScreen>
+<img src="images/arch.png" width="480" height="480">
 
 ## Contributing
 
