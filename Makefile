@@ -15,7 +15,7 @@ lint: ##Lint and static check
 	  python -m black scripts/
 
 black:
-	black scripts tests setup.py --check
+	black scripts --check
 
 test:
 	python -m pytest -ra
