@@ -1,11 +1,15 @@
 import argparse
+import logging
 import os
 import subprocess
 import sys
 import warnings
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
-def install(package):
+
+def install(package: str):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 
 
@@ -41,24 +45,50 @@ col_type = {
     "intl calls": "int64",
     "intl charge": "float64",
     "custserv calls": "int64",
-    # "churn?": "category",
 }
 
 columns = list(col_type.keys())
-# target_col = "churn?"
-# class_labels = ["True.", "False."]
 
 
-def split_col_dtype(col_type, target_label):
-    cat, num = [], []
-    for k, v in col_type.items():
-        if k == target_label:
-            continue
-        if v != "category":
-            num.append(k)
-        else:
-            cat.append(k)
-    return cat, num
+def main(args):
+    """
+    Runs preprocessing for the example data set
+        1. Pulls data from the Athena database
+        2. Transforms features using the saved preprocessor
+        3. Writes preprocessed data to S3
+
+    Args:
+        database (str, required): Athena database to query data from
+        table (str, required): Athena table name to query data from
+        region (str, required): AWS Region for queries
+    """
+
+    logger.info(f"Received arguments {args}")
+    DATABASE, TABLE, region = args.database, args.table, args.region
+
+    boto3.setup_default_session(region_name=f"{region}")
+    df = wr.athena.read_sql_query(
+        f'SELECT * FROM "{TABLE}"', database=DATABASE, ctas_approach=False
+    )
+    df = df[columns]
+    df = df.astype(col_type)
+    logger.info(df.dtypes)
+    df = df.dropna()
+
+    logger.info("Load Preprocessing Model")
+    preprocess = joblib.load("/opt/ml/processing/transformer/preprocessor.joblib")
+
+    logger.info("Running feature engineering transformations")
+    test_features = preprocess.transform(df)
+
+    logger.info(f"Infer data shape after preprocessing: {test_features.shape}")
+
+    test_features_output_path = os.path.join(
+        "/opt/ml/processing/infer", "infer_features.csv"
+    )
+
+    logger.info(f"Saving test data to {test_features_output_path}")
+    test_features.to_csv(test_features_output_path, header=False, index=False)
 
 
 if __name__ == "__main__":
@@ -68,29 +98,4 @@ if __name__ == "__main__":
     parser.add_argument("--table", type=str, required=True)
     args = parser.parse_args()
 
-    print(f"Received arguments {args}")
-    DATABASE, TABLE, region = args.database, args.table, args.region
-
-    boto3.setup_default_session(region_name=f"{args.region}")
-    df = wr.athena.read_sql_query(
-        f'SELECT * FROM "{TABLE}"', database=DATABASE, ctas_approach=False
-    )
-    df = df[columns]
-    df = df.astype(col_type)
-    print(df.dtypes)
-    df.dropna(inplace=True)
-
-    print("Load Preprocessing Model")
-    preprocess = joblib.load("/opt/ml/processing/transformer/preprocessor.joblib")
-
-    print("Running feature engineering transformations")
-    test_features = preprocess.transform(df)
-
-    print(f"Infer data shape after preprocessing: {test_features.shape}")
-
-    test_features_output_path = os.path.join(
-        "/opt/ml/processing/infer", "infer_features.csv"
-    )
-
-    print(f"Saving test data to {test_features_output_path}")
-    test_features.to_csv(test_features_output_path, header=False, index=False)
+    main(args)
