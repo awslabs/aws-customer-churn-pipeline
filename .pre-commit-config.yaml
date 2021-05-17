@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0
+    rev: v4.0.1
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -14,7 +14,7 @@ repos:
       - id: detect-aws-credentials
         args: [--allow-missing-credentials]
   - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.9.1
+    rev: 3.9.2
     hooks:
       - id: flake8
   - repo: https://github.com/pre-commit/pre-commit
@@ -22,12 +22,12 @@ repos:
     hooks:
       - id: validate_manifest
   - repo: https://github.com/psf/black
-    rev: 21.5b0
+    rev: 21.5b1
     hooks:
       - id: black
         args: ["-l 88"]
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.14.0
+    rev: v2.16.0
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
@@ -41,7 +41,7 @@ repos:
       - id: isort
         args: ["--profile", "black", "--filter-files"]
   - repo: https://github.com/awslabs/cfn-python-lint
-    rev: v0.49.0
+    rev: v0.49.1
     hooks:
       - id: cfn-python-lint
         name: cfn-python-lint
