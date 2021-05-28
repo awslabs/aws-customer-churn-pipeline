@@ -501,7 +501,7 @@ Resources:
                             "MaxRuntimeInSeconds": 1800
                         },
                         "ResourceConfig": {
-                            "InstanceCount": 3,
+                            "InstanceCount": 1,
                             "InstanceType": "ml.m5.4xlarge",
                             "VolumeSizeInGB": 30
                         },
@@ -790,7 +790,7 @@ Resources:
                                     "S3DataDistributionType": "FullyReplicated",
                                     "S3CompressionType": "None"
                                 }
-                            },                                  
+                            },
                             {
                                 "InputName": "processing_joblib",
                                 "AppManaged": false,
@@ -1024,10 +1024,10 @@ Resources:
 
           def lambda_handler(event, context):
               '''
-              triggers a step function from the S3 landing event, 
+              triggers a step function from the S3 landing event,
               passing along the S3 file info
               '''
-              
+
               #Fallback tests for initializations outside scope
               try:
                   pp
@@ -1043,13 +1043,13 @@ Resources:
               hyperparametertunning_job_name = f"scikit-learn-tune-{uuid.uuid1().hex}"[
                   :30
               ]  # Each Preprocessing job requires a unique name,
-              
+
               model_name = f"scikit-learn-model-{uuid.uuid1().hex}"
-              
+
               evaluation_job_name = "scikit-learn-sm-evaluation-{}".format(
                   uuid.uuid1().hex,
               )  # Each Evaluation Job requires a unique name
-              
+
               input= {
                   "PreprocessingJobName": preprocessing_job_name,
                   "TuningJobName": hyperparametertunning_job_name,
@@ -1057,16 +1057,16 @@ Resources:
                   "ModelName": model_name,
                   "EvaluationProcessingJobName": evaluation_job_name,
               }
-                  
+
               stepFunction = boto3.client('stepfunctions')
               response = stepFunction.start_execution(
                   stateMachineArn='arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:SageMakerPreproTrainWorkflow',
                   input = json.dumps(input, indent=4)
               )
-                  
+
               s3 = boto3.resource("s3")
               s3.Bucket("${PipelineBucketName}").put_object(
-                  Key="model/ledger/model_name.txt", 
+                  Key="model/ledger/model_name.txt",
                   Body=model_name.encode("utf-8")
                 )
               return pp.pprint(response)
@@ -1095,16 +1095,16 @@ Resources:
 
           def lambda_handler(event, context):
               '''
-              triggers a step function from the S3 landing event, 
+              triggers a step function from the S3 landing event,
               passing along the S3 file info
               '''
-              
+
               #Fallback tests for initializations outside scope
               try:
                   pp
               except NameError:
                   pp = pprint.PrettyPrinter(indent=4)
-                  
+
               # Generate unique names for Preprocessing Job, Training Job,
               # and Model Evaluation Job for the Step Functions Workflow
               inference_job_preproc_name = "scikit-learn-infer-preprocessing-{}".format(
@@ -1112,29 +1112,29 @@ Resources:
               )[
                   :60
               ]  # Each Training Job requires a unique name
-              
+
               inference_job_predict_name = "scikit-learn-infer-predict-{}".format(
                   uuid.uuid1().hex,
               )  # Each Training Job requires a unique name
-              
-              
+
+
               s3 = boto3.resource('s3')
               obj = s3.Object("${PipelineBucketName}", "model/ledger/model_name.txt")
               model_name = obj.get()['Body'].read().decode("utf-8")
               print(model_name)
-              
+
               input= {
                   "PreprocessingJobName": inference_job_preproc_name,
                   "InferencingJobName": inference_job_predict_name,
                   "ModelName": model_name,
               }
-                  
+
               stepFunction = boto3.client('stepfunctions')
               response = stepFunction.start_execution(
                   stateMachineArn='arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:SageMakerPreproInferWorkflow',
                   input = json.dumps(input, indent=4)
               )
-              
+
               return pp.pprint(response)
       Description: Invoke Inference Step Function Pipeline
       TracingConfig:
