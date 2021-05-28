@@ -664,7 +664,7 @@ Resources:
                                 "InputName": "code",
                                 "AppManaged": false,
                                 "S3Input": {
-                                    "S3Uri": "s3://${PipelineBucketName}/script/evaluation.py",
+                                    "S3Uri": "s3://${PipelineBucketName}/script/coxph_evaluation.py",
                                     "LocalPath": "/opt/ml/processing/input/code",
                                     "S3DataType": "S3Prefix",
                                     "S3InputMode": "File",
@@ -711,7 +711,7 @@ Resources:
                             "ImageUri": "${XgbImageID}.dkr.ecr.${AWS::Region}.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
                             "ContainerEntrypoint": [
                                 "python3",
-                                "/opt/ml/processing/input/code/evaluation.py"
+                                "/opt/ml/processing/input/code/coxph_evaluation.py"
                             ]
                         },
                         "RoleArn": "arn:aws:iam::${AWS::AccountId}:role/service-role/AmazonSageMaker-ExecutionRole-TrainingInferencePipeline",
