@@ -6,13 +6,24 @@ STACK_NAME_DEFAULT=customer-churn-sagemaker-pipeline
 STACK_NAME=${1:-${STACK_NAME_DEFAULT}}
 S3_BUCKET_NAME=${2:-train-inference-pipeline-${ACCOUNT_ID}}
 REGION=${3:-${REGION_DEFAULT}}
+TIME_TO_EVENT=$4
 
 DATABASE=$S3_BUCKET_NAME
+
+# Running time to event or binary classification template
+if [[ -n $TIME_TO_EVENT ]]; then
+    TEMPLATE="https://${S3_BUCKET_NAME}.s3-${REGION}.amazonaws.com/cfn/time_to_event_pipeline.yaml"
+    echo $TEMPLATE
+else
+    TEMPLATE="https://${S3_BUCKET_NAME}.s3-${REGION}.amazonaws.com/cfn/classification_pipeline.yaml"
+    echo $TEMPLATE
+fi
 
 echo "stack name=${STACK_NAME}"
 echo "bucket name=${S3_BUCKET_NAME}"
 echo "region=${REGION}"
 echo "database=${DATABASE}"
+echo "template=${TEMPLATE}"
 
 echo "Uploading local data to S3..."
 
@@ -54,7 +65,7 @@ echo "Deplyoing Training and Inference Pipeline..."
 
 aws --region ${REGION} cloudformation create-stack \
 --stack-name ${STACK_NAME}-pipeline \
---template-url https://${S3_BUCKET_NAME}.s3-${REGION}.amazonaws.com/cfn/pipeline.yaml \
+--template-url ${TEMPLATE} \
 --capabilities CAPABILITY_NAMED_IAM \
 --parameters ParameterKey=AthenaDatabaseName,ParameterValue=${DATABASE} \
 ParameterKey=PipelineBucketName,ParameterValue=${S3_BUCKET_NAME} \
