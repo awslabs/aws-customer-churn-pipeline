@@ -826,7 +826,9 @@ Resources:
                                 "--region",
                                 "${AWS::Region}",
                                 "--table",
-                                "infer"
+                                "infer",
+                                "--coxph",
+                                "True"
                             ],
                             "ContainerEntrypoint": [
                                 "python3",

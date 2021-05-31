@@ -20,6 +20,7 @@ install("awswrangler==2.4.0")
 import awswrangler as wr
 import boto3
 import joblib
+import pandas as pd
 from sklearn.exceptions import DataConversionWarning
 
 warnings.filterwarnings(action="ignore", category=DataConversionWarning)
@@ -61,6 +62,8 @@ def main(args):
         database (str, required): Athena database to query data from
         table (str, required): Athena table name to query data from
         region (str, required): AWS Region for queries
+        coxph (bool): Flag indicating that it's a cox proportional hazard model,
+        default False
     """
 
     logger.info(f"Received arguments {args}")
@@ -70,10 +73,14 @@ def main(args):
     df = wr.athena.read_sql_query(
         f'SELECT * FROM "{TABLE}"', database=DATABASE, ctas_approach=False
     )
+
     df = df[columns]
     df = df.astype(col_type)
     logger.info(df.dtypes)
     df = df.dropna()
+
+    if args.coxph:
+        del df["account length"]
 
     logger.info("Load Preprocessing Model")
     preprocess = joblib.load("/opt/ml/processing/transformer/preprocessor.joblib")
@@ -86,9 +93,12 @@ def main(args):
     test_features_output_path = os.path.join(
         "/opt/ml/processing/infer", "infer_features.csv"
     )
-
-    logger.info(f"Saving test data to {test_features_output_path}")
-    test_features.to_csv(test_features_output_path, header=False, index=False)
+    if isinstance(test_features, pd.DataFrame):
+        test_features.to_csv(test_features_output_path, header=False, index=False)
+    else:
+        pd.DataFrame(test_features).to_csv(
+            test_features_output_path, header=False, index=False
+        )
 
 
 if __name__ == "__main__":
@@ -96,6 +106,7 @@ if __name__ == "__main__":
     parser.add_argument("--database", type=str, required=True)
     parser.add_argument("--region", type=str, required=True)
     parser.add_argument("--table", type=str, required=True)
+    parser.add_argument("--coxph", type=bool, default=False)
     args = parser.parse_args()
 
     main(args)
