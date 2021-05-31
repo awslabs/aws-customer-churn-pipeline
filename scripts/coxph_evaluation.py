@@ -15,11 +15,11 @@ def install(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 
 
+os.system("conda install -c sebp scikit-survival -y")
 install("xgboost")
 install("smdebug==1.0.5")
 install("shap==0.39.0")
 install("scikit-learn==0.24.1")
-install("scikit-survival==0.14.0")
 install("matplotlib")
 
 import matplotlib.pyplot as plt
@@ -94,6 +94,8 @@ def main(args):
     X_test.drop(X_test.columns[0], axis=1, inplace=True)
     X_train.drop(X_test.columns[0], axis=1, inplace=True)
 
+    logger.info("Running inference")
+
     predictions = model.predict(
         xgboost.DMatrix(X_test.values[:, 1:]), output_margin=False
     )
@@ -120,18 +122,21 @@ def main(args):
     )
 
     report_dict["concordance_index"] = {
-        "cindex": concordance_index[0],
-        "concordant": concordance_index[1],
-        "discordant": concordance_index[2],
-        "tied_risk": concordance_index[3],
-        "tied_time": concordance_index[4],
+        "cindex": float(concordance_index[0]),
+        "concordant": int(concordance_index[1]),
+        "discordant": int(concordance_index[2]),
+        "tied_risk": int(concordance_index[3]),
+        "tied_time": int(concordance_index[4]),
     }
 
     times, score = brier_score(
         y_train_tuple, y_test_tuple, predictions, y_test_df["duration"].max() - 1
     )
 
-    report_dict["brier_score"] = {"times": times, "score": score}
+    report_dict["brier_score"] = {
+        "times": times.astype(np.int32).tolist(),
+        "score": score.astype(np.float32).tolist(),
+    }
 
     logger.info(f"Classification report:\n{report_dict}")
 
@@ -139,6 +144,8 @@ def main(args):
         "/opt/ml/processing/evaluation", args.report_name
     )
     logger.info(f"Saving classification report to {evaluation_output_path}")
+
+    logger.debug(report_dict)
 
     with open(evaluation_output_path, "w") as f:
         f.write(json.dumps(report_dict))
