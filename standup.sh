@@ -32,7 +32,7 @@ aws s3 sync ./data s3://${S3_BUCKET_NAME}/demo/ > /dev/null
 echo "Building the Athena Workgroup..."
 
 # will not run if primary workgroup already exists!
-aws --region ${REGION} cloudformation create-change-set --stack-name ${STACK_NAME}-athena \
+aws cloudformation --region ${REGION} create-change-set --stack-name ${STACK_NAME}-athena \
 --change-set-name ImportChangeSet --change-set-type IMPORT \
 --resources-to-import "[{\"ResourceType\":\"AWS::Athena::WorkGroup\",\"LogicalResourceId\":\"AthenaPrimaryWorkGroup\",\"ResourceIdentifier\":{\"Name\":\"primary\"}}]" \
 --template-body file://cfn/01-athena.yaml --parameters ParameterKey="DataBucketName",ParameterValue=${S3_BUCKET_NAME} > /dev/null
@@ -43,7 +43,7 @@ aws cloudformation --region ${REGION} execute-change-set --change-set-name Impor
 
 echo "Building Glue resources..."
 
-aws --region ${REGION} cloudformation create-stack \
+aws cloudformation --region ${REGION} create-stack \
 --stack-name ${STACK_NAME}-glue \
 --template-body file://./cfn/02-crawler.yaml \
 --capabilities CAPABILITY_NAMED_IAM \
@@ -63,7 +63,7 @@ aws glue --region ${REGION} start-crawler --name crawler-${STACK_NAME} > /dev/nu
 
 echo "Deplyoing Training and Inference Pipeline..."
 
-aws --region ${REGION} cloudformation create-stack \
+aws cloudformation --region ${REGION}  create-stack \
 --stack-name ${STACK_NAME}-pipeline \
 --template-url ${TEMPLATE} \
 --capabilities CAPABILITY_NAMED_IAM \
