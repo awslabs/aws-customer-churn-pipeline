@@ -33,20 +33,22 @@ def main(args):
     Runs evaluation for the data set
         1. Loads model from tar.gz
         2. Reads in test features
-        3. Runs classification accuracy report
+        3. Runs an classification accuracy report
         4. Generates feature importance with SHAP
 
     Args:
-        model-name (str, required): Name of the trained model, default xgboost
-        test-features (str, required): preprocessed test features for
+        model-name (str): Name of the trained model, default xgboost
+        test-features (str): preprocessed test features for
          evaluation, default test_features.csv
-        train-features (str, required): preproceed train features for SHAP,
+        train-features (str): preproceed train features for SHAP,
         default train_features.csv
-        report-name (str, required): Name of the evaluation output
+        test-features (str): preproceed test features for SHAP,
+        default test_features.csv
+        report-name (str): Name of the evaluation output
         , default evaluation.json
-        shap-name (str, required): Name of the SHAP feature importance
+        shap-name (str): Name of the SHAP feature importance
         output file, default shap.csv
-        threshold (float, required): Threshold to cut probablities at
+        threshold (float): Threshold to cut probablities at
         , default 0.5
     """
 

@@ -38,21 +38,25 @@ def main(args):
     Runs evaluation for the data set
         1. Loads model from tar.gz
         2. Reads in test features
-        3. Runs classification accuracy report
+        3. Runs an accuracy report
         4. Generates feature importance with SHAP
 
     Args:
-        model-name (str, required): Name of the trained model, default xgboost
-        test-features (str, required): preprocessed test features for
+        model-name (str): Name of the trained model, default xgboost
+        test-features (str): preprocessed test features for
          evaluation, default test_features.csv
-        train-features (str, required): preproceed train features for SHAP,
+        train-features (str): preproceed train features for SHAP,
         default train_features.csv
-        report-name (str, required): Name of the evaluation output
+        test-features (str): preproceed test features for SHAP,
+        default test_features.csv
+        report-name (str): Name of the evaluation output
         , default evaluation.json
-        shap-name (str, required): Name of the SHAP feature importance
+        shap-name (str): Name of the SHAP feature importance
         output file, default shap.csv
-        threshold (float, required): Threshold to cut probablities at
+        threshold (float): Threshold to cut probablities at
         , default 0.5
+        tau (int): time range for the c-index will be from 0 to tau
+        , default 100
     """
 
     model_path = os.path.join("/opt/ml/processing/model", "model.tar.gz")
@@ -94,8 +98,9 @@ def main(args):
         xgboost.DMatrix(X_test.values[:, 1:]), output_margin=False
     )
 
-    logger.info("Creating classification evaluation report")
+    logger.info("Creating evaluation report")
 
+    # NOTE: technical evaluation is really not as a classifier
     # TO DO: Normalize to 0 to 1 scale
     report_dict = classification_report(
         y_test_df["event"], predictions > args.threshold, output_dict=True
@@ -108,7 +113,10 @@ def main(args):
     _, y_test_tuple = get_x_y(y_test_df, ["event", "duration"], pos_label=True)
 
     concordance_index = concordance_index_ipcw(
-        y_train_tuple, y_test_tuple, predictions, tau=100  # within 100 days
+        y_train_tuple,
+        y_test_tuple,
+        predictions,
+        tau=args.tau,  # default within 100 days
     )
 
     report_dict["concordance_index"] = {
@@ -164,6 +172,7 @@ if __name__ == "__main__":
     parser.add_argument("--report-name", type=str, default="evaluation.json")
     parser.add_argument("--shap-name", type=str, default="shap.csv")
     parser.add_argument("--threshold", type=float, default=0.5)
+    parser.add_argument("--tau", type=int, default=100)
     args = parser.parse_args()
 
     main(args)
