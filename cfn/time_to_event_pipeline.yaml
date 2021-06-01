@@ -454,7 +454,7 @@ Resources:
                                 "tree_method":"hist",
                                 "num_round": "100",
                                 "tweedie_variance_power": "1.4",
-                                "early_stopping_rounds":10
+                                "early_stopping_rounds": "10"
                             }
                         }
                     },
