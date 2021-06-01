@@ -368,7 +368,7 @@ Resources:
                         "HyperParameterTuningJobConfig": {
                             "Strategy": "Bayesian",
                             "ResourceLimits": {
-                                "MaxNumberOfTrainingJobs": 4,
+                                "MaxNumberOfTrainingJobs": 8,
                                 "MaxParallelTrainingJobs": 2
                             },
                             "TrainingJobEarlyStoppingType": "Auto",
@@ -452,8 +452,9 @@ Resources:
                             "StaticHyperParameters": {
                                 "objective": "survival:cox",
                                 "tree_method":"hist",
-                                "num_round": "5",
-                                "tweedie_variance_power": "1.4"
+                                "num_round": "100",
+                                "tweedie_variance_power": "1.4",
+                                "early_stopping_rounds":10
                             }
                         }
                     },
