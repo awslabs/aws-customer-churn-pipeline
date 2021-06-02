@@ -28,6 +28,7 @@ import pandas as pd
 import shap
 import xgboost
 from sklearn.metrics import accuracy_score, classification_report
+from sklearn.preprocessing import MinMaxScaler
 from sksurv.datasets import get_x_y
 from sksurv.metrics import brier_score, concordance_index_ipcw
 from smdebug.trials import create_trial
@@ -99,16 +100,17 @@ def main(args):
     predictions = model.predict(
         xgboost.DMatrix(X_test.values[:, 1:]), output_margin=False
     )
+    normed_predictions = MinMaxScaler().fit_transform(predictions.reshape(-1, 1))
 
     logger.info("Creating evaluation report")
 
     # NOTE: technical evaluation is really not as a classifier
     # TO DO: Normalize to 0 to 1 scale
     report_dict = classification_report(
-        y_test_df["event"], predictions > args.threshold, output_dict=True
+        y_test_df["event"], normed_predictions > args.threshold, output_dict=True
     )
     report_dict["accuracy"] = accuracy_score(
-        y_test_df["event"], predictions > args.threshold
+        y_test_df["event"], normed_predictions > args.threshold
     )
 
     _, y_train_tuple = get_x_y(y_train_df, ["event", "duration"], pos_label=True)

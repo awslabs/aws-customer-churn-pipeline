@@ -93,8 +93,6 @@ def main(args):
         , default is 25%
         random-state (float): Random seed used for train and test split
         , default is 123
-
-
     """
     logger.debug(f"Received arguments {args}")
     DATABASE, TABLE, REGION = args.database, args.table, args.region
@@ -125,6 +123,8 @@ def main(args):
 
     y = survival_y_cox(df)
     X = df.drop(["event", "duration"], 1)
+
+    logger.info(f"Splitting training and validation by{args.train_test_split_ratio}")
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=args.train_test_split_ratio, random_state=args.random_state
@@ -171,6 +171,14 @@ def main(args):
     train_features = np.hstack((y_train.reshape(-1, 1), train_features))
     test_features = np.hstack((y_test.reshape(-1, 1), test_features))
 
+    # getting the feature names
+    feature_names = (
+        numerical_idx
+        + preprocessor.transformers_[1][1]["onehot"].get_feature_names().tolist()
+    )
+
+    feature_names = ["target"] + feature_names
+
     preprocessor_output_path = os.path.join(
         "/opt/ml/processing/transformer", "preprocessor.joblib"
     )
@@ -185,12 +193,13 @@ def main(args):
     )
 
     logger.info(f"Saving training data to {train_features_output_path}")
-    pd.DataFrame(train_features).to_csv(
+
+    pd.DataFrame(train_features, columns=feature_names).to_csv(
         train_features_output_path, header=True, index=False
     )
 
     logger.info(f"Saving test data to {test_features_output_path}")
-    pd.DataFrame(test_features).to_csv(
+    pd.DataFrame(test_features, columns=feature_names).to_csv(
         test_features_output_path, header=True, index=False
     )
 
@@ -200,7 +209,7 @@ if __name__ == "__main__":
     parser.add_argument("--database", type=str, required=True)
     parser.add_argument("--region", type=str, required=True)
     parser.add_argument("--table", type=str, required=True)
-    parser.add_argument("--train-test-split-ratio", type=float, default=0.25)
+    parser.add_argument("--train-test-split-ratio", type=float, default=0.20)
     parser.add_argument("--random-state", type=float, default=123)
     args = parser.parse_args()
 
