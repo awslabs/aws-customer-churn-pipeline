@@ -380,8 +380,8 @@ Resources:
                                 "ContinuousParameterRanges": [
                                     {
                                         "Name": "eta",
-                                        "MinValue": "0",
-                                        "MaxValue": "1",
+                                        "MinValue": "0.1",
+                                        "MaxValue": "0.5",
                                         "ScalingType": "Auto"
                                     },
                                     {
@@ -453,7 +453,7 @@ Resources:
                                 "objective": "survival:cox",
                                 "tree_method":"hist",
                                 "num_round": "100",
-                                "tweedie_variance_power": "1.4",
+                                "subsample": "0.8",
                                 "early_stopping_rounds": "10"
                             }
                         }
