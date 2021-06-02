@@ -61,7 +61,7 @@ sleep 30
 
 aws glue --region ${REGION} start-crawler --name crawler-${STACK_NAME} > /dev/null
 
-echo "Deplyoing Training and Inference Pipeline..."
+echo "Deploying Training and Inference Pipeline..."
 
 aws cloudformation --region ${REGION}  create-stack \
 --stack-name ${STACK_NAME}-pipeline \
