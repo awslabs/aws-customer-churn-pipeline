@@ -45,11 +45,18 @@ It provides:
     # Clean up
     ./delete_resources.sh
 
+To run with Cox proportional hazard modeling instead of binary logloss pass a 4th argument:
+
+`./standup.sh <stack-name> <bucket-name> <region> true`
+
 ## [Read The Docs](https://awslabs.github.io/aws-customer-churn-pipeline/)
 
 [Documentation](https://awslabs.github.io/aws-customer-churn-pipeline/)
 
-In addition, check out the blog post [Deploying a Scalable End to End Customer Churn Prediction Solution with AWS](https://towardsdatascience.com/deploying-a-scalable-end-to-end-customer-churn-prediction-solution-with-aws-cbf3536be996)!
+In addition, check out the blog posts:
+
+* [Deploying a Scalable End to End Customer Churn Prediction Solution with AWS](https://towardsdatascience.com/deploying-a-scalable-end-to-end-customer-churn-prediction-solution-with-aws-cbf3536be996)!
+* [Retain Customers with Time to Event Modeling-Driven Intervention](https://towardsdatascience.com/retain-customers-with-time-to-event-modeling-driven-intervention-de517a39c6e3)
 
 ## Solution Architecture
 
