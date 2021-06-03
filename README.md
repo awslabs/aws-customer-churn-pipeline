@@ -11,7 +11,6 @@ It provides:
 - Amazon Athena and AWS Glue backend that allows for the pipeline to scale on demand and with new data
 - End to End Implementation for your own custom churn pipeline
 
-
 > An [AWS Professional Service](https://aws.amazon.com/professional-services/) open source initiative | aws-proserve-opensource@amazon.com
 
 [![Python Version](https://img.shields.io/badge/python-3.9-brightgreen.svg)]()
@@ -23,10 +22,12 @@ It provides:
 
 ## Table of contents
 
-- [Quick Start](#quick-start)
-- [Read The Docs](#read-the-docs)
-- [Soution Architecture](#solution-architecture)
-- [Contributing](#contributing)
+- [Customer Churn Pipeline on AWS](#customer-churn-pipeline-on-aws)
+  - [Table of contents](#table-of-contents)
+  - [Quick Start](#quick-start)
+  - [Read The Docs](#read-the-docs)
+  - [Solution Architecture](#solution-architecture)
+  - [Contributing](#contributing)
 
 ## Quick Start
 

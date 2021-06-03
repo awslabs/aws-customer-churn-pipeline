@@ -10,14 +10,17 @@ TIME_TO_EVENT=$4
 
 DATABASE=$S3_BUCKET_NAME
 
-# Running time to event or binary classification template
-if [[ -n $TIME_TO_EVENT ]]; then
-    TEMPLATE="https://${S3_BUCKET_NAME}.s3-${REGION}.amazonaws.com/cfn/time_to_event_pipeline.yaml"
-    echo $TEMPLATE
-else
-    TEMPLATE="https://${S3_BUCKET_NAME}.s3-${REGION}.amazonaws.com/cfn/classification_pipeline.yaml"
-    echo $TEMPLATE
-fi
+case "$TIME_TO_EVENT" in 
+
+    "time")
+        TEMPLATE="https://${S3_BUCKET_NAME}.s3-${REGION}.amazonaws.com/cfn/time_to_event_pipeline.yaml"
+        echo $TEMPLATE
+    ;;
+    *)
+        TEMPLATE="https://${S3_BUCKET_NAME}.s3-${REGION}.amazonaws.com/cfn/classification_pipeline.yaml"
+        echo $TEMPLATE 
+    ;;
+esac
 
 echo "stack name=${STACK_NAME}"
 echo "bucket name=${S3_BUCKET_NAME}"
@@ -37,7 +40,7 @@ aws cloudformation --region ${REGION} create-change-set --stack-name ${STACK_NAM
 --resources-to-import "[{\"ResourceType\":\"AWS::Athena::WorkGroup\",\"LogicalResourceId\":\"AthenaPrimaryWorkGroup\",\"ResourceIdentifier\":{\"Name\":\"primary\"}}]" \
 --template-body file://cfn/01-athena.yaml --parameters ParameterKey="DataBucketName",ParameterValue=${S3_BUCKET_NAME} > /dev/null
 
-sleep 5
+sleep 15
 
 aws cloudformation --region ${REGION} execute-change-set --change-set-name ImportChangeSet --stack-name ${STACK_NAME}-athena > /dev/null
 
