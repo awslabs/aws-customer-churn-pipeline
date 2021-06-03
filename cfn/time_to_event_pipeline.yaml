@@ -454,6 +454,7 @@ Resources:
                                 "tree_method":"hist",
                                 "num_round": "500",
                                 "subsample": "0.8",
+                                "seed": "123" ,
                                 "early_stopping_rounds": "10"
                             }
                         }
