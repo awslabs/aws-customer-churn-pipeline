@@ -368,6 +368,7 @@ Resources:
                                   "HyperParameterTuningJobConfig": {
                                       "Strategy": "Bayesian",
                                       "ResourceLimits": {
+                                      
                                           "MaxNumberOfTrainingJobs": 4,
                                           "MaxParallelTrainingJobs": 2
                                       },
