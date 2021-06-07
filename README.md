@@ -16,7 +16,6 @@ It provides:
 [![Python Version](https://img.shields.io/badge/python-3.9-brightgreen.svg)]()
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 ![ActionBuild](https://github.com/awslabs/aws-customer-churn-pipeline/actions/workflows/testing.yaml/badge.svg)
-[![Documentation Status](https://readthedocs.org/projects/ansicolortags/badge/?version=latest)](http://ansicolortags.readthedocs.io/?badge=latest)
 ![Release Version](https://img.shields.io/github/v/release/awslabs/aws-customer-churn-pipeline.svg)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
