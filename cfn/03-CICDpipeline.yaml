@@ -1,0 +1,224 @@
+Description: CodePipeline for Churn prediction 
+Parameters:
+    pSourceBucket:
+        Type: String
+        Description: Path of the S3 bucket that CodePipeline should find a sagemaker jobfile
+        Default: "train-inference-pipeline"
+
+    pModelNamePrefix:
+        Type: String
+        Description: The name prefix of the model that will be supported by this pipeline
+        Default: "churn"
+
+    pEnvironment:
+      Type: String
+      Description: Environment (sbx, dev, test, preprod, prod)
+      AllowedValues:
+        - sbx
+        - dev
+        - test
+        - preprod
+        - prod
+
+    pRepositoryName:
+      Type: String
+      Default: "awslabs/aws-customer-churn-pipeline"
+
+    pBuildImageName:
+      Description: Instance type
+      Type: String
+      Default: "aws/codebuild/standard:4.0"
+
+    pBranchName:
+      Description: Branch name where changes are to be detected
+      Type: String
+      Default: "main"
+    
+    pGithubConnectionArn:
+      Description: Connection arn for git
+      Type: String
+   
+Resources:
+
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "${pModelNamePrefix}-LogGroup-${pEnvironment}"
+      RetentionInDays: 365
+ 
+  ################## CodeBuild and CodePipeline Role ##############################
+  
+  CodePipelineServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${pModelNamePrefix}-CodePipelineServiceRole-${pEnvironment}
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: !Sub AWS-CodePipeline-${pModelNamePrefix}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codestar-connections:UseConnection
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - 'codebuild:BatchGetBuilds'
+                  - 'codebuild:StartBuild'
+                  - 'codebuild:BatchGetBuildBatches'
+                  - 'codebuild:StartBuildBatch'
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - "s3:Delete*"
+                  - "s3:Put*"
+                  - "s3:Get*"
+                  - "s3:List*"
+                  - "s3:Create*"
+                  - "s3:Head*"
+                Resource:
+                  - !Sub "arn:aws:s3:::${pSourceBucket}"
+                  - !Sub "arn:aws:s3:::${pSourceBucket}/*"
+
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${pModelNamePrefix}-CodeBuildServiceRole-${pEnvironment}"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: /
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/CloudWatchFullAccess"
+        - "arn:aws:iam::aws:policy/AWSBackupFullAccess"
+        - "arn:aws:iam::aws:policy/AWSLambda_FullAccess"
+      Policies:
+        - PolicyName: CodeBuildBasePolicy-CodeBuildProject
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource:
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/pki-${pModelNamePrefix}-CodeBuildProject-${pEnvironment}"
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/pki-${pModelNamePrefix}-CodeBuildProject-${pEnvironment}:*"
+              - Effect: Allow
+                Action:
+                  - 'iam:PassRole'
+                Resource:
+                  - !Sub "arn:aws:iam::${AWS::AccountId}:role/service-role/${pModelNamePrefix}-CodeBuildServiceRole-${pEnvironment}"
+              - Effect: Allow
+                Action:
+                  - "s3:Delete*"
+                  - "s3:Put*"
+                  - "s3:Get*"
+                  - "s3:List*"
+                  - "s3:Create*"
+                  - "s3:Head*"
+                Resource:
+                  - !Sub "arn:aws:s3:::${pSourceBucket}"
+                  - !Sub "arn:aws:s3:::${pSourceBucket}/*"
+              - Effect: Allow
+                Action:
+                  - "codestar-connections:UseConnection"
+                  - "codestar-connections:GetConnection"
+                  - "codestar-connections:ListConnections"
+                  - "codestar-connections:TagResource"
+                  - "codestar-connections:ListTagsForResource"
+                  - "codestar-connections:UntagResource"
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - "sagemaker:CreateTrainingJob"
+                  - "sagemaker:DescribeTrainingJob"
+                  - "sagemaker:StopTrainingJob"
+                  - "sagemaker:CreateProcessingJob"
+                Resource: '*'
+            
+
+################## CodeBuild Stage and CodePipeline Pipeline ##############################
+  BuildStage:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub '${pModelNamePrefix}-build'
+      Artifacts:
+        Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: buildspec.yml
+      Environment:
+        ComputeType: BUILD_GENERAL1_LARGE
+        Type: LINUX_CONTAINER
+        Image: !Ref pBuildImageName
+        PrivilegedMode: true
+      TimeoutInMinutes: 120
+      LogsConfig:
+        CloudWatchLogs:
+          GroupName: !Sub "${pModelNamePrefix}-LogGroup-${pEnvironment}"
+          Status: ENABLED
+      ServiceRole: !GetAtt
+          - CodeBuildServiceRole
+          - Arn
+
+  CICDPipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: !Sub ${pModelNamePrefix}-pipeline
+      RoleArn: !GetAtt
+        - CodePipelineServiceRole
+        - Arn
+      ArtifactStore:
+          Type: S3
+          Location: !Sub ${pSourceBucket}
+      Stages:
+        -
+          Name: !Sub Source-${pModelNamePrefix}
+          Actions:
+            - Name: ApplicationSource
+              ActionTypeId:
+                Version: '1'
+                Owner: AWS
+                Category: Source
+                Provider: CodeStarSourceConnection
+              OutputArtifacts:
+                - Name: Source
+              RunOrder: 1
+              Configuration:
+                ConnectionArn: !Ref pGithubConnectionArn
+                FullRepositoryId: !Ref pRepositoryName
+                BranchName: !Ref pBranchName
+                OutputArtifactFormat: CODEBUILD_CLONE_REF
+        -
+          Name: !Sub Build-${pModelNamePrefix}
+          Actions:
+            - Name: BuildStage
+              InputArtifacts:
+                - Name: Source
+              ActionTypeId:
+                Category: Build
+                Provider: CodeBuild
+                Owner: AWS
+                Version: '1'
+              OutputArtifacts:
+                - Name: BuildStage
+              Configuration:
+                ProjectName: !Ref BuildStage
+              RunOrder: 1           
+       

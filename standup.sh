@@ -17,8 +17,9 @@ case "$TIME_TO_EVENT" in
         echo $TEMPLATE
     ;;
     *)
-        TEMPLATE="https://${S3_BUCKET_NAME}.s3-${REGION}.amazonaws.com/cfn/classification_pipeline.yaml"
-        echo $TEMPLATE 
+        #TEMPLATE="https://${S3_BUCKET_NAME}.s3-${REGION}.amazonaws.com/cfn/classification_pipeline.yaml"
+        TEMPLATE="https://${S3_BUCKET_NAME}.s3.amazonaws.com/cfn/classification_pipeline.yaml"
+        echo $TEMPLATE
     ;;
 esac
 
@@ -27,6 +28,12 @@ echo "bucket name=${S3_BUCKET_NAME}"
 echo "region=${REGION}"
 echo "database=${DATABASE}"
 echo "template=${TEMPLATE}"
+
+if aws s3 ls "s3://${S3_BUCKET_NAME}" 2>&1 | grep -q 'NoSuchBucket'
+then
+echo "S3 bucket does not exist. Creating..."
+aws s3api create-bucket --bucket ${S3_BUCKET_NAME} --region ${REGION}
+fi
 
 echo "Uploading local data to S3..."
 
@@ -68,7 +75,7 @@ echo "Deploying Training and Inference Pipeline..."
 
 aws cloudformation --region ${REGION}  create-stack \
 --stack-name ${STACK_NAME}-pipeline \
---template-url ${TEMPLATE} \
+--template-url "${TEMPLATE}" \
 --capabilities CAPABILITY_NAMED_IAM \
 --parameters ParameterKey=AthenaDatabaseName,ParameterValue=${DATABASE} \
 ParameterKey=PipelineBucketName,ParameterValue=${S3_BUCKET_NAME} \

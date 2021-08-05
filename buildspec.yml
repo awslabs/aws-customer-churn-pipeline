@@ -1,0 +1,28 @@
+version: 0.2
+env:
+  shell: bash
+phases:
+  install:
+    runtime-versions:
+      python: 3.7
+    commands:
+      - echo "Installing awscli ..."
+      - pip install --upgrade awscli
+      - pip install boto3
+
+  pre_build:
+    commands:
+      - echo "Begin s3 sync"
+      - aws s3 sync ./scripts s3://${S3_BUCKET_NAME}/script/
+      - aws s3 sync ./cfn/ s3://${S3_BUCKET_NAME}/cfn/
+      - aws s3 sync ./data s3://${S3_BUCKET_NAME}/demo/
+  build:
+    commands:
+      - echo "Deploy application"
+      - sh CICD/deploy_infrastructure.sh
+  post_build:
+    commands:
+      - echo "In post build"
+
+
+
