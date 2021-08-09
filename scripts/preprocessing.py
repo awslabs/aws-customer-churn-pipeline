@@ -19,13 +19,13 @@ import awswrangler as wr
 import boto3
 import joblib
 import pandas as pd
+from denseclus import DenseClus
 from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import DataConversionWarning
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from denseclus import DenseClus
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -58,6 +58,7 @@ col_type = {
 columns = list(col_type.keys())
 target_col = "churn?"
 class_labels = ["True.", "False."]
+
 
 def split_col_dtype(col_type: dict, target_label: str) -> Tuple[List[str], List[str]]:
     """Split columns into categorical and numerical lists
@@ -126,16 +127,15 @@ def main(args):
 
     # no fit predict method currently supported for DenseClus
     # See: https://github.com/awslabs/amazon-denseclus/issues/4
-    if args.cluster == True:
+    if args.cluster:
 
         logger.info("Clustering data")
         clf = DenseClus()
         clf.fit(df)
         logger.info("Clusters fit")
 
-        df['segments'] = clf.score()
-        df['segments'] = df['segments'].astype(str)
-
+        df["segments"] = clf.score()
+        df["segments"] = df["segments"].astype(str)
 
     split_ratio = args.train_test_split_ratio
     logger.info(f"Splitting data into train and test sets with ratio {split_ratio}")
@@ -182,7 +182,7 @@ def main(args):
     preprocessor_output_path = os.path.join(
         "/opt/ml/processing/transformer", "preprocessor.joblib"
     )
-    joblib.dump(preprocess, preprocessor_output_path)
+    joblib.dump(preprocessor, preprocessor_output_path)
 
     logger.info(f"Train data shape after preprocessing: {train_features.shape}")
     logger.info(f"Test data shape after preprocessing: {test_features.shape}")
@@ -213,8 +213,12 @@ if __name__ == "__main__":
     parser.add_argument("--table", type=str, required=True)
     parser.add_argument("--train-test-split-ratio", type=float, default=0.25)
     parser.add_argument("--random-state", type=float, default=123)
-    parser.add_argument("--cluster", default=False, type=bool
-    , help="Run clusters as part of preprocessing")
+    parser.add_argument(
+        "--cluster",
+        default=False,
+        type=bool,
+        help="Run clusters as part of preprocessing",
+    )
     args = parser.parse_args()
 
     main(args)
