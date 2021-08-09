@@ -17,12 +17,14 @@ def install(package):
 
 install("awswrangler==2.4.0")
 install("scikit-learn==0.24.1")
+install("Amazon-DenseClus==0.0.7")
 
 import awswrangler as wr
 import boto3
 import joblib
 import numpy as np
 import pandas as pd
+from denseclus import DenseClus
 from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import DataConversionWarning
 from sklearn.impute import SimpleImputer
@@ -120,6 +122,17 @@ def main(args):
             df.shape, positive_examples, negative_examples
         )
     )
+    # no fit predict method currently supported for DenseClus
+    # See: https://github.com/awslabs/amazon-denseclus/issues/4
+    if args.cluster:
+
+        logger.info("Clustering data")
+        clf = DenseClus()
+        clf.fit(df)
+        logger.info("Clusters fit")
+
+        df["segments"] = clf.score()
+        df["segments"] = df["segments"].astype(str)
 
     y = survival_y_cox(df)
     X = df.drop(["event", "duration"], 1)
@@ -211,6 +224,12 @@ if __name__ == "__main__":
     parser.add_argument("--table", type=str, required=True)
     parser.add_argument("--train-test-split-ratio", type=float, default=0.20)
     parser.add_argument("--random-state", type=float, default=123)
+    parser.add_argument(
+        "--cluster",
+        default=False,
+        type=bool,
+        help="Run clusters as part of preprocessing",
+    )
     args = parser.parse_args()
 
     main(args)

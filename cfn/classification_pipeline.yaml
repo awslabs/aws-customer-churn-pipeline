@@ -2,1164 +2,1166 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: "Training/Inference Pipeline"
 
 Parameters:
-    AthenaDatabaseName:
-        Description: "Which Athena Database to Use?"
-        Type: String
-        Default: "churnblog"
+  AthenaDatabaseName:
+    Description: "Which Athena Database to Use?"
+    Type: String
+    Default: "churnblog"
 
-    PipelineBucketName:
-        Description: "Which Bucket is Used for the Training/Inference Pipelines?"
-        Type: String
-        Default: "train-inference-pipeline"
+  PipelineBucketName:
+    Description: "Which Bucket is Used for the Training/Inference Pipelines?"
+    Type: String
+    Default: "train-inference-pipeline"
 
 Mappings:
-    AWSRegionArch2DebuggerImageRegistry:
-        af-south-1:
-            id: 314341159256
-        ap-east-1:
-            id: 199566480951
-        ap-northeast-1:
-            id: 430734990657
-        ap-northeast-2:
-            id: 578805364391
-        ap-south-1:
-            id: 904829902805
-        ap-southeast-1:
-            id: 972752614525
-        ap-southeast-2:
-            id: 184798709955
-        ca-central-1:
-            id: 519511493484
-        cn-north-1:
-            id: 618459771430
-        cn-northwest-1:
-            id: 658757709296
-        eu-central-1:
-            id: 482524230118
-        eu-north-1:
-            id: 314864569078
-        eu-south-1:
-            id: 563282790590
-        eu-west-1:
-            id: 929884845733
-        eu-west-2:
-            id: 250201462417
-        eu-west-3:
-            id: 447278800020
-        me-south-1:
-            id: 986000313247
-        sa-east-1:
-            id: 818342061345
-        us-east-1:
-            id: 503895931360
-        us-east-2:
-            id: 915447279597
-        us-west-1:
-            id: 685455198987
-        us-west-2:
-            id: 895741380848
-        us-gov-west-1:
-            id: 515509971035
+  AWSRegionArch2DebuggerImageRegistry:
+    af-south-1:
+      id: 314341159256
+    ap-east-1:
+      id: 199566480951
+    ap-northeast-1:
+      id: 430734990657
+    ap-northeast-2:
+      id: 578805364391
+    ap-south-1:
+      id: 904829902805
+    ap-southeast-1:
+      id: 972752614525
+    ap-southeast-2:
+      id: 184798709955
+    ca-central-1:
+      id: 519511493484
+    cn-north-1:
+      id: 618459771430
+    cn-northwest-1:
+      id: 658757709296
+    eu-central-1:
+      id: 482524230118
+    eu-north-1:
+      id: 314864569078
+    eu-south-1:
+      id: 563282790590
+    eu-west-1:
+      id: 929884845733
+    eu-west-2:
+      id: 250201462417
+    eu-west-3:
+      id: 447278800020
+    me-south-1:
+      id: 986000313247
+    sa-east-1:
+      id: 818342061345
+    us-east-1:
+      id: 503895931360
+    us-east-2:
+      id: 915447279597
+    us-west-1:
+      id: 685455198987
+    us-west-2:
+      id: 895741380848
+    us-gov-west-1:
+      id: 515509971035
 
-    AWSRegionArch2XGBoostImageRegistry:
-        us-east-1:
-            id: 683313688378
-        us-east-2:
-            id: 257758044811
-        us-west-1:
-            id: 746614075791
-        us-west-2:
-            id: 246618743249
-        ca-central-1:
-            id: 341280168497
-        eu-west-1:
-            id: 141502667606
-        eu-west-2:
-            id: 764974769150
-        eu-central-1:
-            id: 492215442770
-        eu-west-3:
-            id: 659782779980
-        eu-north-1:
-            id: 662702820516
-        ap-east-1:
-            id: 651117190479
-        ap-northeast-1:
-            id: 354813040037
-        ap-northeast-2:
-            id: 366743142698
-        ap-southeast-1:
-            id: 121021644041
-        ap-southeast-2:
-            id: 783357654285
-        ap-south-1:
-            id: 720646828776
-        me-south-1:
-            id: 801668240914
-        sa-east-1:
-            id: 737474898029
-        us-gov-west-1:
-            id: 414596584902
-        us-iso-east-1:
-            id: 833128469047
-        cn-north-1:
-            id: 450853457545
-        cn-northwest-1:
-            id: 451049120500
+  AWSRegionArch2XGBoostImageRegistry:
+    us-east-1:
+      id: 683313688378
+    us-east-2:
+      id: 257758044811
+    us-west-1:
+      id: 746614075791
+    us-west-2:
+      id: 246618743249
+    ca-central-1:
+      id: 341280168497
+    eu-west-1:
+      id: 141502667606
+    eu-west-2:
+      id: 764974769150
+    eu-central-1:
+      id: 492215442770
+    eu-west-3:
+      id: 659782779980
+    eu-north-1:
+      id: 662702820516
+    ap-east-1:
+      id: 651117190479
+    ap-northeast-1:
+      id: 354813040037
+    ap-northeast-2:
+      id: 366743142698
+    ap-southeast-1:
+      id: 121021644041
+    ap-southeast-2:
+      id: 783357654285
+    ap-south-1:
+      id: 720646828776
+    me-south-1:
+      id: 801668240914
+    sa-east-1:
+      id: 737474898029
+    us-gov-west-1:
+      id: 414596584902
+    us-iso-east-1:
+      id: 833128469047
+    cn-north-1:
+      id: 450853457545
+    cn-northwest-1:
+      id: 451049120500
 
 Resources:
-    IAMRoleStepFunction:
-        Type: "AWS::IAM::Role"
-        Properties:
-            Path: "/"
-            RoleName: "AmazonSageMaker-StepFunctionsWorkflowExecutionRole-TIP"
-            AssumeRolePolicyDocument:
-                Version: 2012-10-17
-                Statement:
-                    - Effect: Allow
-                      Principal:
-                          Service:
-                              - states.amazonaws.com
-                      Action:
-                          - "sts:AssumeRole"
-            MaxSessionDuration: 3600
-            ManagedPolicyArns:
-                - "arn:aws:iam::aws:policy/service-role/AWSLambdaRole"
-                - "arn:aws:iam::aws:policy/CloudWatchEventsFullAccess"
-                - !Ref IAMManagedPolicyStepFunction
-            Description: "Allows Step Functions to access AWS resources on your behalf."
+  IAMRoleStepFunction:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Path: "/"
+      RoleName: "AmazonSageMaker-StepFunctionsWorkflowExecutionRole-TIP"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - states.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      MaxSessionDuration: 3600
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaRole"
+        - "arn:aws:iam::aws:policy/CloudWatchEventsFullAccess"
+        - !Ref IAMManagedPolicyStepFunction
+      Description: "Allows Step Functions to access AWS resources on your behalf."
 
-    IAMManagedPolicyS3Access:
-        Type: "AWS::IAM::ManagedPolicy"
-        Properties:
-            ManagedPolicyName: "AmazonSageMaker-ExecutionPolicy-TrainingInferencePipeline"
-            Path: "/service-role/"
-            PolicyDocument: |
+  IAMManagedPolicyS3Access:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      ManagedPolicyName: "AmazonSageMaker-ExecutionPolicy-TrainingInferencePipeline"
+      Path: "/service-role/"
+      PolicyDocument: |
+        {
+            "Version": "2012-10-17",
+            "Statement": [
                 {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Effect": "Allow",
-                            "Action": [
-                                "s3:GetBucketLocation",
-                                "s3:GetObject",
-                                "s3:ListBucket",
-                                "s3:ListBucketMultipartUploads",
-                                "s3:ListMultipartUploadParts",
-                                "s3:AbortMultipartUpload",
-                                "s3:DeleteObject",
-                                "s3:CreateBucket",
-                                "s3:PutObject"
-                            ],
-                            "Resource": [
-                                "arn:aws:s3:::*"
-                            ]
-                        }
+                    "Effect": "Allow",
+                    "Action": [
+                        "s3:GetBucketLocation",
+                        "s3:GetObject",
+                        "s3:ListBucket",
+                        "s3:ListBucketMultipartUploads",
+                        "s3:ListMultipartUploadParts",
+                        "s3:AbortMultipartUpload",
+                        "s3:DeleteObject",
+                        "s3:CreateBucket",
+                        "s3:PutObject"
+                    ],
+                    "Resource": [
+                        "arn:aws:s3:::*"
                     ]
                 }
+            ]
+        }
 
-    IAMRoleSageMaker:
-        Type: "AWS::IAM::Role"
-        Properties:
-            Path: "/service-role/"
-            RoleName: "AmazonSageMaker-ExecutionRole-TrainingInferencePipeline"
-            AssumeRolePolicyDocument:
-                Version: 2012-10-17
-                Statement:
-                    - Effect: Allow
-                      Principal:
-                          Service:
-                              - sagemaker.amazonaws.com
-                      Action:
-                          - "sts:AssumeRole"
-            MaxSessionDuration: 3600
-            ManagedPolicyArns:
-                - "arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"
-                - "arn:aws:iam::aws:policy/AWSStepFunctionsFullAccess"
-                - "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
-                - !Ref IAMManagedPolicyS3Access
-            Description: "SageMaker execution role created from the SageMaker AWS Management Console."
+  IAMRoleSageMaker:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Path: "/service-role/"
+      RoleName: "AmazonSageMaker-ExecutionRole-TrainingInferencePipeline"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - sagemaker.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      MaxSessionDuration: 3600
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"
+        - "arn:aws:iam::aws:policy/AWSStepFunctionsFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
+        - !Ref IAMManagedPolicyS3Access
+      Description: "SageMaker execution role created from the SageMaker AWS Management Console."
 
-    IAMManagedPolicyStepFunction:
-        Type: "AWS::IAM::ManagedPolicy"
-        Properties:
-            ManagedPolicyName: "AmazonSageMaker-StepFunctionsWorkflowExecutionPolicy-TrainingInferencePipeline"
-            Path: "/"
-            PolicyDocument: !Sub |
+  IAMManagedPolicyStepFunction:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      ManagedPolicyName: "AmazonSageMaker-StepFunctionsWorkflowExecutionPolicy-TrainingInferencePipeline"
+      Path: "/"
+      PolicyDocument: !Sub |
+        {
+            "Version": "2012-10-17",
+            "Statement": [
                 {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Sid": "VisualEditor0",
-                            "Effect": "Allow",
-                            "Action": [
-                                "events:PutTargets",
-                                "events:DescribeRule",
-                                "events:PutRule"
-                            ],
-                            "Resource": [
-                                "arn:aws:events:*:*:rule/StepFunctionsGetEventsForSageMakerTrainingJobsRule",
-                                "arn:aws:events:*:*:rule/StepFunctionsGetEventsForSageMakerTransformJobsRule",
-                                "arn:aws:events:*:*:rule/StepFunctionsGetEventsForSageMakerTuningJobsRule",
-                                "arn:aws:events:*:*:rule/StepFunctionsGetEventsForECSTaskRule",
-                                "arn:aws:events:*:*:rule/StepFunctionsGetEventsForBatchJobsRule"
-                            ]
-                        },
-                        {
-                            "Sid": "VisualEditor1",
-                            "Effect": "Allow",
-                            "Action": "iam:PassRole",
-                            "Resource": "arn:aws:iam::${AWS::AccountId}:role/service-role/${IAMRoleSageMaker}",
-                            "Condition": {
-                                "StringEquals": {
-                                    "iam:PassedToService": "sagemaker.amazonaws.com"
+                    "Sid": "VisualEditor0",
+                    "Effect": "Allow",
+                    "Action": [
+                        "events:PutTargets",
+                        "events:DescribeRule",
+                        "events:PutRule"
+                    ],
+                    "Resource": [
+                        "arn:aws:events:*:*:rule/StepFunctionsGetEventsForSageMakerTrainingJobsRule",
+                        "arn:aws:events:*:*:rule/StepFunctionsGetEventsForSageMakerTransformJobsRule",
+                        "arn:aws:events:*:*:rule/StepFunctionsGetEventsForSageMakerTuningJobsRule",
+                        "arn:aws:events:*:*:rule/StepFunctionsGetEventsForECSTaskRule",
+                        "arn:aws:events:*:*:rule/StepFunctionsGetEventsForBatchJobsRule"
+                    ]
+                },
+                {
+                    "Sid": "VisualEditor1",
+                    "Effect": "Allow",
+                    "Action": "iam:PassRole",
+                    "Resource": "arn:aws:iam::${AWS::AccountId}:role/service-role/${IAMRoleSageMaker}",
+                    "Condition": {
+                        "StringEquals": {
+                            "iam:PassedToService": "sagemaker.amazonaws.com"
+                        }
+                    }
+                },
+                {
+                    "Sid": "VisualEditor2",
+                    "Effect": "Allow",
+                    "Action": [
+                        "batch:DescribeJobs",
+                        "batch:SubmitJob",
+                        "batch:TerminateJob",
+                        "dynamodb:DeleteItem",
+                        "dynamodb:GetItem",
+                        "dynamodb:PutItem",
+                        "dynamodb:UpdateItem",
+                        "ecs:DescribeTasks",
+                        "ecs:RunTask",
+                        "ecs:StopTask",
+                        "glue:BatchStopJobRun",
+                        "glue:GetJobRun",
+                        "glue:GetJobRuns",
+                        "glue:StartJobRun",
+                        "lambda:InvokeFunction",
+                        "sagemaker:CreateEndpoint",
+                        "sagemaker:CreateEndpointConfig",
+                        "sagemaker:CreateHyperParameterTuningJob",
+                        "sagemaker:CreateModel",
+                        "sagemaker:CreateProcessingJob",
+                        "sagemaker:CreateTrainingJob",
+                        "sagemaker:CreateTransformJob",
+                        "sagemaker:DeleteEndpoint",
+                        "sagemaker:DeleteEndpointConfig",
+                        "sagemaker:DescribeHyperParameterTuningJob",
+                        "sagemaker:DescribeProcessingJob",
+                        "sagemaker:DescribeTrainingJob",
+                        "sagemaker:DescribeTransformJob",
+                        "sagemaker:ListProcessingJobs",
+                        "sagemaker:ListTags",
+                        "sagemaker:StopHyperParameterTuningJob",
+                        "sagemaker:StopProcessingJob",
+                        "sagemaker:StopTrainingJob",
+                        "sagemaker:StopTransformJob",
+                        "sagemaker:UpdateEndpoint",
+                        "sns:Publish",
+                        "sqs:SendMessage"
+                    ],
+                    "Resource": "*"
+                }
+            ]
+        }
+
+  StepFunctionsStateMachineTraining:
+    Type: "AWS::StepFunctions::StateMachine"
+    Properties:
+      StateMachineName: "SageMakerPreproTrainWorkflow"
+      DefinitionString: !Sub
+        - |
+          {
+            "StartAt": "SageMaker Training Step Preprocessing",
+            "States": {
+                "SageMaker Training Step Preprocessing": {
+                    "Resource": "arn:aws:states:::sagemaker:createProcessingJob.sync",
+                    "Parameters": {
+                        "ProcessingJobName.$": "$$.Execution.Input['PreprocessingJobName']",
+                        "ProcessingInputs": [
+                            {
+                                "InputName": "code",
+                                "AppManaged": false,
+                                "S3Input": {
+                                    "S3Uri": "s3://${PipelineBucketName}/script/preprocessing.py",
+                                    "LocalPath": "/opt/ml/processing/input/code",
+                                    "S3DataType": "S3Prefix",
+                                    "S3InputMode": "File",
+                                    "S3DataDistributionType": "FullyReplicated",
+                                    "S3CompressionType": "None"
                                 }
                             }
+                        ],
+                        "ProcessingOutputConfig": {
+                            "Outputs": [
+                                {
+                                    "OutputName": "train_data",
+                                    "AppManaged": false,
+                                    "S3Output": {
+                                        "S3Uri": "s3://${PipelineBucketName}/data/train_data",
+                                        "LocalPath": "/opt/ml/processing/train",
+                                        "S3UploadMode": "EndOfJob"
+                                    }
+                                },
+                                {
+                                    "OutputName": "test_data",
+                                    "AppManaged": false,
+                                    "S3Output": {
+                                        "S3Uri": "s3://${PipelineBucketName}/data/test_data",
+                                        "LocalPath": "/opt/ml/processing/test",
+                                        "S3UploadMode": "EndOfJob"
+                                    }
+                                },
+                                {
+                                    "OutputName": "preprocessor",
+                                    "AppManaged": false,
+                                    "S3Output": {
+                                        "S3Uri": "s3://${PipelineBucketName}/model/preprocessor",
+                                        "LocalPath": "/opt/ml/processing/transformer",
+                                        "S3UploadMode": "EndOfJob"
+                                    }
+                                }
+                            ]
                         },
-                        {
-                            "Sid": "VisualEditor2",
-                            "Effect": "Allow",
-                            "Action": [
-                                "batch:DescribeJobs",
-                                "batch:SubmitJob",
-                                "batch:TerminateJob",
-                                "dynamodb:DeleteItem",
-                                "dynamodb:GetItem",
-                                "dynamodb:PutItem",
-                                "dynamodb:UpdateItem",
-                                "ecs:DescribeTasks",
-                                "ecs:RunTask",
-                                "ecs:StopTask",
-                                "glue:BatchStopJobRun",
-                                "glue:GetJobRun",
-                                "glue:GetJobRuns",
-                                "glue:StartJobRun",
-                                "lambda:InvokeFunction",
-                                "sagemaker:CreateEndpoint",
-                                "sagemaker:CreateEndpointConfig",
-                                "sagemaker:CreateHyperParameterTuningJob",
-                                "sagemaker:CreateModel",
-                                "sagemaker:CreateProcessingJob",
-                                "sagemaker:CreateTrainingJob",
-                                "sagemaker:CreateTransformJob",
-                                "sagemaker:DeleteEndpoint",
-                                "sagemaker:DeleteEndpointConfig",
-                                "sagemaker:DescribeHyperParameterTuningJob",
-                                "sagemaker:DescribeProcessingJob",
-                                "sagemaker:DescribeTrainingJob",
-                                "sagemaker:DescribeTransformJob",
-                                "sagemaker:ListProcessingJobs",
-                                "sagemaker:ListTags",
-                                "sagemaker:StopHyperParameterTuningJob",
-                                "sagemaker:StopProcessingJob",
-                                "sagemaker:StopTrainingJob",
-                                "sagemaker:StopTransformJob",
-                                "sagemaker:UpdateEndpoint",
-                                "sns:Publish",
-                                "sqs:SendMessage"
+                        "AppSpecification": {
+                            "ImageUri": "${XgbImageID}.dkr.ecr.${AWS::Region}.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
+                            "ContainerArguments": [
+                                "--database",
+                                "${AthenaDatabaseName}",
+                                "--region",
+                                "${AWS::Region}",
+                                "--table",
+                                "train",
+                                "--train-test-split-ratio",
+                                "0.2",
+                                "--cluster",
+                                "True"
                             ],
-                            "Resource": "*"
+                            "ContainerEntrypoint": [
+                                "python3",
+                                "/opt/ml/processing/input/code/preprocessing.py"
+                            ]
+                        },
+                        "RoleArn": "arn:aws:iam::${AWS::AccountId}:role/service-role/AmazonSageMaker-ExecutionRole-TrainingInferencePipeline",
+                        "ProcessingResources": {
+                            "ClusterConfig": {
+                                "InstanceCount": 1,
+                                "InstanceType": "ml.m5.xlarge",
+                                "VolumeSizeInGB": 30
+                            }
+                        },
+                        "StoppingCondition": {
+                            "MaxRuntimeInSeconds": 1200
+                        }
+                    },
+                    "Type": "Task",
+                    "Next": "SageMaker HyperParameter Tuning Step",
+                    "Catch": [
+                        {
+                            "ErrorEquals": [
+                                "States.TaskFailed"
+                            ],
+                            "Next": "ML Workflow failed"
                         }
                     ]
-                }
+                },
+                "SageMaker HyperParameter Tuning Step": {
+                    "Resource": "arn:aws:states:::sagemaker:createHyperParameterTuningJob.sync",
+                    "Parameters": {
+                        "HyperParameterTuningJobName.$": "$$.Execution.Input['TuningJobName']",
+                        "HyperParameterTuningJobConfig": {
+                            "Strategy": "Bayesian",
+                            "ResourceLimits": {
 
-    StepFunctionsStateMachineTraining:
-        Type: "AWS::StepFunctions::StateMachine"
-        Properties:
-            StateMachineName: "SageMakerPreproTrainWorkflow"
-            DefinitionString: !Sub
-                - |
-                    {
-                      "StartAt": "SageMaker Training Step Preprocessing",
-                      "States": {
-                          "SageMaker Training Step Preprocessing": {
-                              "Resource": "arn:aws:states:::sagemaker:createProcessingJob.sync",
-                              "Parameters": {
-                                  "ProcessingJobName.$": "$$.Execution.Input['PreprocessingJobName']",
-                                  "ProcessingInputs": [
-                                      {
-                                          "InputName": "code",
-                                          "AppManaged": false,
-                                          "S3Input": {
-                                              "S3Uri": "s3://${PipelineBucketName}/script/preprocessing.py",
-                                              "LocalPath": "/opt/ml/processing/input/code",
-                                              "S3DataType": "S3Prefix",
-                                              "S3InputMode": "File",
-                                              "S3DataDistributionType": "FullyReplicated",
-                                              "S3CompressionType": "None"
-                                          }
-                                      }
-                                  ],
-                                  "ProcessingOutputConfig": {
-                                      "Outputs": [
-                                          {
-                                              "OutputName": "train_data",
-                                              "AppManaged": false,
-                                              "S3Output": {
-                                                  "S3Uri": "s3://${PipelineBucketName}/data/train_data",
-                                                  "LocalPath": "/opt/ml/processing/train",
-                                                  "S3UploadMode": "EndOfJob"
-                                              }
-                                          },
-                                          {
-                                              "OutputName": "test_data",
-                                              "AppManaged": false,
-                                              "S3Output": {
-                                                  "S3Uri": "s3://${PipelineBucketName}/data/test_data",
-                                                  "LocalPath": "/opt/ml/processing/test",
-                                                  "S3UploadMode": "EndOfJob"
-                                              }
-                                          },
-                                          {
-                                              "OutputName": "preprocessor",
-                                              "AppManaged": false,
-                                              "S3Output": {
-                                                  "S3Uri": "s3://${PipelineBucketName}/model/preprocessor",
-                                                  "LocalPath": "/opt/ml/processing/transformer",
-                                                  "S3UploadMode": "EndOfJob"
-                                              }
-                                          }
-                                      ]
-                                  },
-                                  "AppSpecification": {
-                                      "ImageUri": "${XgbImageID}.dkr.ecr.${AWS::Region}.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
-                                      "ContainerArguments": [
-                                          "--database",
-                                          "${AthenaDatabaseName}",
-                                          "--region",
-                                          "${AWS::Region}",
-                                          "--table",
-                                          "train",
-                                          "--train-test-split-ratio",
-                                          "0.2"
-                                      ],
-                                      "ContainerEntrypoint": [
-                                          "python3",
-                                          "/opt/ml/processing/input/code/preprocessing.py"
-                                      ]
-                                  },
-                                  "RoleArn": "arn:aws:iam::${AWS::AccountId}:role/service-role/AmazonSageMaker-ExecutionRole-TrainingInferencePipeline",
-                                  "ProcessingResources": {
-                                      "ClusterConfig": {
-                                          "InstanceCount": 1,
-                                          "InstanceType": "ml.m5.xlarge",
-                                          "VolumeSizeInGB": 30
-                                      }
-                                  },
-                                  "StoppingCondition": {
-                                      "MaxRuntimeInSeconds": 1200
-                                  }
-                              },
-                              "Type": "Task",
-                              "Next": "SageMaker HyperParameter Tuning Step",
-                              "Catch": [
-                                  {
-                                      "ErrorEquals": [
-                                          "States.TaskFailed"
-                                      ],
-                                      "Next": "ML Workflow failed"
-                                  }
-                              ]
-                          },
-                          "SageMaker HyperParameter Tuning Step": {
-                              "Resource": "arn:aws:states:::sagemaker:createHyperParameterTuningJob.sync",
-                              "Parameters": {
-                                  "HyperParameterTuningJobName.$": "$$.Execution.Input['TuningJobName']",
-                                  "HyperParameterTuningJobConfig": {
-                                      "Strategy": "Bayesian",
-                                      "ResourceLimits": {
-                                      
-                                          "MaxNumberOfTrainingJobs": 4,
-                                          "MaxParallelTrainingJobs": 2
-                                      },
-                                      "TrainingJobEarlyStoppingType": "Auto",
-                                      "HyperParameterTuningJobObjective": {
-                                          "Type": "Maximize",
-                                          "MetricName": "validation:auc"
-                                      },
-                                      "ParameterRanges": {
-                                          "ContinuousParameterRanges": [
-                                              {
-                                                  "Name": "eta",
-                                                  "MinValue": "0",
-                                                  "MaxValue": "1",
-                                                  "ScalingType": "Auto"
-                                              },
-                                              {
-                                                  "Name": "min_child_weight",
-                                                  "MinValue": "1",
-                                                  "MaxValue": "10",
-                                                  "ScalingType": "Auto"
-                                              },
-                                              {
-                                                  "Name": "alpha",
-                                                  "MinValue": "0",
-                                                  "MaxValue": "2",
-                                                  "ScalingType": "Auto"
-                                              }
-                                          ],
-                                          "CategoricalParameterRanges": [],
-                                          "IntegerParameterRanges": [
-                                              {
-                                                  "Name": "max_depth",
-                                                  "MinValue": "1",
-                                                  "MaxValue": "10",
-                                                  "ScalingType": "Auto"
-                                              }
-                                          ]
-                                      }
-                                  },
-                                  "TrainingJobDefinition": {
-                                      "AlgorithmSpecification": {
-                                          "TrainingImage": "${XgbImageID}.dkr.ecr.${AWS::Region}.amazonaws.com/sagemaker-xgboost:1.2-1",
-                                          "TrainingInputMode": "File"
-                                      },
-                                      "OutputDataConfig": {
-                                          "S3OutputPath": "s3://${PipelineBucketName}/tuner/"
-                                      },
-                                      "StoppingCondition": {
-                                          "MaxRuntimeInSeconds": 86400
-                                      },
-                                      "ResourceConfig": {
-                                          "InstanceCount": 1,
-                                          "InstanceType": "ml.m4.xlarge",
-                                          "VolumeSizeInGB": 30
-                                      },
-                                      "RoleArn": "arn:aws:iam::${AWS::AccountId}:role/service-role/AmazonSageMaker-ExecutionRole-TrainingInferencePipeline",
-                                      "InputDataConfig": [
-                                          {
-                                              "DataSource": {
-                                                  "S3DataSource": {
-                                                      "S3DataType": "S3Prefix",
-                                                      "S3Uri": "s3://${PipelineBucketName}/data/train_data",
-                                                      "S3DataDistributionType": "FullyReplicated"
-                                                  }
-                                              },
-                                              "ContentType": "text/csv",
-                                              "ChannelName": "train"
-                                          },
-                                          {
-                                              "DataSource": {
-                                                  "S3DataSource": {
-                                                      "S3DataType": "S3Prefix",
-                                                      "S3Uri": "s3://${PipelineBucketName}/data/test_data",
-                                                      "S3DataDistributionType": "FullyReplicated"
-                                                  }
-                                              },
-                                              "ContentType": "text/csv",
-                                              "ChannelName": "validation"
-                                          }
-                                      ],
-                                      "StaticHyperParameters": {
-                                          "eval_metric": "auc",
-                                          "objective": "binary:logistic",
-                                          "num_round": "5",
-                                          "tweedie_variance_power": "1.4"
-                                      }
-                                  }
-                              },
-                              "Type": "Task",
-                              "Next": "SageMaker Step Getting Best HyperParameter",
-                              "Catch": [
-                                  {
-                                      "ErrorEquals": [
-                                          "States.TaskFailed"
-                                      ],
-                                      "Next": "ML Workflow failed"
-                                  }
-                              ]
-                          },
-                          "SageMaker Step Getting Best HyperParameter": {
-                              "Parameters": {
-                                  "FunctionName": "${LambdaFunctionBestHyper}",
-                                  "Payload": {
-                                      "TrainingJobName.$": "$.BestTrainingJob"
-                                  }
-                              },
-                              "OutputPath": "$.Payload.body.bestHyperParameter",
-                              "Resource": "arn:aws:states:::lambda:invoke",
-                              "Type": "Task",
-                              "Next": "SageMaker Training Step",
-                              "Catch": [
-                                  {
-                                      "ErrorEquals": [
-                                          "States.TaskFailed"
-                                      ],
-                                      "Next": "ML Workflow failed"
-                                  }
-                              ]
-                          },
-                          "SageMaker Training Step": {
-                              "Resource": "arn:aws:states:::sagemaker:createTrainingJob.sync",
-                              "Parameters": {
-                                  "AlgorithmSpecification": {
-                                      "TrainingImage": "${XgbImageID}.dkr.ecr.${AWS::Region}.amazonaws.com/sagemaker-xgboost:1.2-1",
-                                      "TrainingInputMode": "File"
-                                  },
-                                  "OutputDataConfig": {
-                                      "S3OutputPath": "s3://${PipelineBucketName}/config"
-                                  },
-                                  "StoppingCondition": {
-                                      "MaxRuntimeInSeconds": 1800
-                                  },
-                                  "ResourceConfig": {
-                                      "InstanceCount": 3,
-                                      "InstanceType": "ml.m5.4xlarge",
-                                      "VolumeSizeInGB": 30
-                                  },
-                                  "RoleArn": "arn:aws:iam::${AWS::AccountId}:role/service-role/AmazonSageMaker-ExecutionRole-TrainingInferencePipeline",
-                                  "InputDataConfig": [
-                                      {
-                                          "DataSource": {
-                                              "S3DataSource": {
-                                                  "S3DataType": "S3Prefix",
-                                                  "S3Uri": "s3://${PipelineBucketName}/data/train_data",
-                                                  "S3DataDistributionType": "FullyReplicated"
-                                              }
-                                          },
-                                          "ContentType": "text/csv",
-                                          "ChannelName": "train"
-                                      },
-                                      {
-                                          "DataSource": {
-                                              "S3DataSource": {
-                                                  "S3DataType": "S3Prefix",
-                                                  "S3Uri": "s3://${PipelineBucketName}/data/test_data",
-                                                  "S3DataDistributionType": "FullyReplicated"
-                                              }
-                                          },
-                                          "ContentType": "text/csv",
-                                          "ChannelName": "validation"
-                                      }
-                                  ],
-                                  "TrainingJobName.$": "$$.Execution.Input['TrainingJobName']",
-                                  "DebugHookConfig": {
-                                      "S3OutputPath": "s3://${PipelineBucketName}/debug",
-                                      "HookParameters": {
-                                          "save_interval": "5",
-                                          "include_regex": ".*"
-                                      },
-                                      "CollectionConfigurations": [
-                                          {
-                                              "CollectionName": "metrics"
-                                          },
-                                          {
-                                              "CollectionName": "feature_importance"
-                                          },
-                                          {
-                                              "CollectionName": "full_shap"
-                                          },
-                                          {
-                                              "CollectionName": "average_shap"
-                                          }
-                                      ]
-                                  },
-                                  "DebugRuleConfigurations": [
-                                      {
-                                          "RuleConfigurationName": "LossNotDecreasing",
-                                          "RuleEvaluatorImage": "${DebuggerImageId}.dkr.ecr.${AWS::Region}.amazonaws.com/sagemaker-debugger-rules:latest",
-                                          "RuleParameters": {
-                                              "rule_to_invoke": "LossNotDecreasing",
-                                              "collection_names": "metrics",
-                                              "num_steps": "10"
-                                          }
-                                      }
-                                  ],
-                                  "HyperParameters.$": "$"
-                              },
-                              "Type": "Task",
-                              "Next": "SageMaker Step Save Model",
-                              "Catch": [
-                                  {
-                                      "ErrorEquals": [
-                                          "States.TaskFailed"
-                                      ],
-                                      "Next": "ML Workflow failed"
-                                  }
-                              ]
-                          },
-                          "SageMaker Step Save Model": {
-                              "Parameters": {
-                                  "ExecutionRoleArn": "arn:aws:iam::${AWS::AccountId}:role/service-role/AmazonSageMaker-ExecutionRole-TrainingInferencePipeline",
-                                  "ModelName.$": "$$.Execution.Input['ModelName']",
-                                  "PrimaryContainer": {
-                                      "Environment": {},
-                                      "Image": "${XgbImageID}.dkr.ecr.${AWS::Region}.amazonaws.com/sagemaker-xgboost:1.2-1",
-                                      "ModelDataUrl.$": "$['ModelArtifacts']['S3ModelArtifacts']"
-                                  }
-                              },
-                              "Resource": "arn:aws:states:::sagemaker:createModel",
-                              "Type": "Task",
-                              "Next": "SageMaker Step Get Model Url",
-                              "Catch": [
-                                  {
-                                      "ErrorEquals": [
-                                          "States.TaskFailed"
-                                      ],
-                                      "Next": "ML Workflow failed"
-                                  }
-                              ]
-                          },
-                          "SageMaker Step Get Model Url": {
-                              "Parameters": {
-                                  "FunctionName": "${LambdaFunctionGetModelData}",
-                                  "Payload": {
-                                      "TrainingJobName.$": "$"
-                                  }
-                              },
-                              "OutputPath": "$.Payload.body",
-                              "Resource": "arn:aws:states:::lambda:invoke",
-                              "Type": "Task",
-                              "Next": "SageMaker Step Model Explainability",
-                              "Catch": [
-                                  {
-                                      "ErrorEquals": [
-                                          "States.TaskFailed"
-                                      ],
-                                      "Next": "ML Workflow failed"
-                                  }
-                              ]
-                          },
-                          "SageMaker Step Model Explainability": {
-                              "Resource": "arn:aws:states:::sagemaker:createProcessingJob.sync",
-                              "Parameters": {
-                                  "ProcessingJobName.$": "$$.Execution.Input['EvaluationProcessingJobName']",
-                                  "ProcessingInputs": [
-                                      {
-                                          "InputName": "train_data",
-                                          "AppManaged": false,
-                                          "S3Input": {
-                                              "S3Uri": "s3://${PipelineBucketName}/data/train_data",
-                                              "LocalPath": "/opt/ml/processing/train",
-                                              "S3DataType": "S3Prefix",
-                                              "S3InputMode": "File",
-                                              "S3DataDistributionType": "FullyReplicated",
-                                              "S3CompressionType": "None"
-                                          }
-                                      },
-                                      {
-                                          "InputName": "test_data",
-                                          "AppManaged": false,
-                                          "S3Input": {
-                                              "S3Uri": "s3://${PipelineBucketName}/data/test_data",
-                                              "LocalPath": "/opt/ml/processing/test",
-                                              "S3DataType": "S3Prefix",
-                                              "S3InputMode": "File",
-                                              "S3DataDistributionType": "FullyReplicated",
-                                              "S3CompressionType": "None"
-                                          }
-                                      },
-                                      {
-                                          "InputName": "model",
-                                          "AppManaged": false,
-                                          "S3Input": {
-                                              "S3Uri.$": "$['modelDataUrl']",
-                                              "LocalPath": "/opt/ml/processing/model",
-                                              "S3DataType": "S3Prefix",
-                                              "S3InputMode": "File",
-                                              "S3DataDistributionType": "FullyReplicated",
-                                              "S3CompressionType": "None"
-                                          }
-                                      },
-                                      {
-                                          "InputName": "code",
-                                          "AppManaged": false,
-                                          "S3Input": {
-                                              "S3Uri": "s3://${PipelineBucketName}/script/evaluation.py",
-                                              "LocalPath": "/opt/ml/processing/input/code",
-                                              "S3DataType": "S3Prefix",
-                                              "S3InputMode": "File",
-                                              "S3DataDistributionType": "FullyReplicated",
-                                              "S3CompressionType": "None"
-                                          }
-                                      },
-                                      {
-                                          "InputName": "shap",
-                                          "AppManaged": false,
-                                          "S3Input": {
-                                              "S3Uri.$": "$['train_debug_path']",
-                                              "LocalPath": "/opt/ml/processing/debug/",
-                                              "S3DataType": "S3Prefix",
-                                              "S3InputMode": "File",
-                                              "S3DataDistributionType": "FullyReplicated",
-                                              "S3CompressionType": "None"
-                                          }
-                                      }
-                                  ],
-                                  "ProcessingOutputConfig": {
-                                      "Outputs": [
-                                          {
-                                              "OutputName": "evaluation",
-                                              "AppManaged": false,
-                                              "S3Output": {
-                                                  "S3Uri": "s3://${PipelineBucketName}/evaluation/metric",
-                                                  "LocalPath": "/opt/ml/processing/evaluation",
-                                                  "S3UploadMode": "EndOfJob"
-                                              }
-                                          },
-                                          {
-                                              "OutputName": "plot",
-                                              "AppManaged": false,
-                                              "S3Output": {
-                                                  "S3Uri": "s3://${PipelineBucketName}/evaluation/shap",
-                                                  "LocalPath": "/opt/ml/processing/plot",
-                                                  "S3UploadMode": "EndOfJob"
-                                              }
-                                          }
-                                      ]
-                                  },
-                                  "AppSpecification": {
-                                      "ImageUri": "${XgbImageID}.dkr.ecr.${AWS::Region}.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
-                                      "ContainerEntrypoint": [
-                                          "python3",
-                                          "/opt/ml/processing/input/code/evaluation.py"
-                                      ]
-                                  },
-                                  "RoleArn": "arn:aws:iam::${AWS::AccountId}:role/service-role/AmazonSageMaker-ExecutionRole-TrainingInferencePipeline",
-                                  "ProcessingResources": {
-                                      "ClusterConfig": {
-                                          "InstanceCount": 1,
-                                          "InstanceType": "ml.m5.xlarge",
-                                          "VolumeSizeInGB": 30
-                                      }
-                                  },
-                                  "StoppingCondition": {
-                                      "MaxRuntimeInSeconds": 1200
-                                  }
-                              },
-                              "Type": "Task",
-                              "End": true,
-                              "Catch": [
-                                  {
-                                      "ErrorEquals": [
-                                          "States.TaskFailed"
-                                      ],
-                                      "Next": "ML Workflow failed"
-                                  }
-                              ]
-                          },
-                          "ML Workflow failed": {
-                              "Cause": "SageMakerProcessingJobFailed",
-                              "Type": "Fail"
-                          }
-                      }
-                    }
-                - {
-                      XgbImageID:
-                          !FindInMap [
-                              AWSRegionArch2XGBoostImageRegistry,
-                              !Ref "AWS::Region",
-                              id,
-                          ],
-                      DebuggerImageId:
-                          !FindInMap [
-                              AWSRegionArch2DebuggerImageRegistry,
-                              !Ref "AWS::Region",
-                              id,
-                          ],
-                  }
-            RoleArn: !GetAtt IAMRoleStepFunction.Arn
-            StateMachineType: "STANDARD"
-            LoggingConfiguration:
-                # Destinations:
-                # - CloudWatchLogsLogGroup:
-                # LogGroupArn: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/vendedlogs/states/SageMakerProcessTrainWorkflow-Log:*"
-                IncludeExecutionData: true
-                Level: "OFF"
-
-    StepFunctionsStateMachineInference:
-        Type: "AWS::StepFunctions::StateMachine"
-        Properties:
-            StateMachineName: "SageMakerPreproInferWorkflow"
-            DefinitionString: !Sub
-                - |
-                    {
-                      "StartAt": "SageMaker Inference Step Preprocessing",
-                      "States": {
-                          "SageMaker Inference Step Preprocessing": {
-                              "Resource": "arn:aws:states:::sagemaker:createProcessingJob.sync",
-                              "Parameters": {
-                                  "ProcessingJobName.$": "$$.Execution.Input['PreprocessingJobName']",
-                                  "ProcessingInputs": [
-                                      {
-                                          "InputName": "code",
-                                          "AppManaged": false,
-                                          "S3Input": {
-                                              "S3Uri": "s3://${PipelineBucketName}/script/inferpreprocessing.py",
-                                              "LocalPath": "/opt/ml/processing/input/code",
-                                              "S3DataType": "S3Prefix",
-                                              "S3InputMode": "File",
-                                              "S3DataDistributionType": "FullyReplicated",
-                                              "S3CompressionType": "None"
-                                          }
-                                      },                                  
-                                      {
-                                          "InputName": "processing_joblib",
-                                          "AppManaged": false,
-                                          "S3Input": {
-                                              "S3Uri": "s3://${PipelineBucketName}/model/preprocessor/preprocessor.joblib",
-                                              "LocalPath": "/opt/ml/processing/transformer",
-                                              "S3DataType": "S3Prefix",
-                                              "S3InputMode": "File",
-                                              "S3DataDistributionType": "FullyReplicated",
-                                              "S3CompressionType": "None"
-                                          }
-                                      }
-                                  ],
-                                  "ProcessingOutputConfig": {
-                                      "Outputs": [
-                                          {
-                                              "OutputName": "infer_data",
-                                              "AppManaged": false,
-                                              "S3Output": {
-                                                  "S3Uri": "s3://${PipelineBucketName}/data/intermediate/infer_data",
-                                                  "LocalPath": "/opt/ml/processing/infer",
-                                                  "S3UploadMode": "EndOfJob"
-                                              }
-                                          }
-                                      ]
-                                  },
-                                  "AppSpecification": {
-                                      "ImageUri": "${XgbImageID}.dkr.ecr.${AWS::Region}.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
-                                      "ContainerArguments": [
-                                          "--database",
-                                          "${AthenaDatabaseName}",
-                                          "--region",
-                                          "${AWS::Region}",
-                                          "--table",
-                                          "infer"
-                                      ],
-                                      "ContainerEntrypoint": [
-                                          "python3",
-                                          "/opt/ml/processing/input/code/inferpreprocessing.py"
-                                      ]
-                                  },
-                                  "RoleArn": "arn:aws:iam::${AWS::AccountId}:role/service-role/AmazonSageMaker-ExecutionRole-TrainingInferencePipeline",
-                                  "ProcessingResources": {
-                                      "ClusterConfig": {
-                                          "InstanceCount": 1,
-                                          "InstanceType": "ml.m5.xlarge",
-                                          "VolumeSizeInGB": 30
-                                      }
-                                  },
-                                  "StoppingCondition": {
-                                      "MaxRuntimeInSeconds": 1200
-                                  }
-                              },
-                              "Type": "Task",
-                              "Next": "Transform Input Dataset",
-                              "Catch": [
-                                  {
-                                      "ErrorEquals": [
-                                          "States.TaskFailed"
-                                      ],
-                                      "Next": "ML Workflow failed"
-                                  }
-                              ]
-                          },
-                          "Transform Input Dataset": {
-                              "Resource": "arn:aws:states:::sagemaker:createTransformJob.sync",
-                              "Parameters": {
-                                  "TransformJobName.$": "$$.Execution.Input['InferencingJobName']",
-                                  "ModelName.$": "$$.Execution.Input['ModelName']",
-                                  "TransformInput": {
-                                      "DataSource": {
-                                          "S3DataSource": {
-                                              "S3DataType": "S3Prefix",
-                                              "S3Uri": "s3://${PipelineBucketName}/data/intermediate/infer_data"
-                                          }
-                                      },
-                                      "ContentType": "text/csv"
-                                  },
-                                  "TransformOutput": {
-                                      "S3OutputPath": "s3://${PipelineBucketName}/data/inference_result"
-                                  },
-                                  "TransformResources": {
-                                      "InstanceCount": 1,
-                                      "InstanceType": "ml.m5.large"
-                                  }
-                              },
-                              "Type": "Task",
-                              "End": true,
-                              "Catch": [
-                                  {
-                                      "ErrorEquals": [
-                                          "States.TaskFailed"
-                                      ],
-                                      "Next": "ML Workflow failed"
-                                  }
-                              ]
-                          },
-                          "ML Workflow failed": {
-                              "Cause": "SageMakerProcessingJobFailed",
-                              "Type": "Fail"
-                          }
-                      }
-                    }
-                - {
-                      XgbImageID:
-                          !FindInMap [
-                              AWSRegionArch2XGBoostImageRegistry,
-                              !Ref "AWS::Region",
-                              id,
-                          ],
-                  }
-            RoleArn: !GetAtt IAMRoleStepFunction.Arn
-            StateMachineType: "STANDARD"
-            LoggingConfiguration:
-                # Destinations:
-                # - CloudWatchLogsLogGroup:
-                # LogGroupArn: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/vendedlogs/states/SageMakerProcessingInferWorkflow-Log:*"
-                IncludeExecutionData: true
-                Level: "OFF"
-
-    LambdaFunctionGetModelData:
-        Type: AWS::Lambda::Function
-        Properties:
-            FunctionName: "getSageMakerModelUrl"
-            Runtime: python3.6
-            Timeout: 900
-            MemorySize: 128
-            Role: !GetAtt LambdaIAMRole.Arn
-            Handler: index.lambda_handler
-            Code:
-                ZipFile: !Sub |
-                    import boto3
-
-                    def lambda_handler(event, context):
-                        sm_client = boto3.client("sagemaker")
-
-                        job = sm_client.describe_model(
-                            ModelName=event["TrainingJobName"]["ModelArn"].split("/")[-1]
-                        )
-                        training_job_name = job["PrimaryContainer"]["ModelDataUrl"].split('/')[-3]
-
-                        return {
-                            "statusCode": 200,
-                            "body": {
-                                "modelDataUrl": job["PrimaryContainer"]["ModelDataUrl"],
-                                "train_debug_path": f"s3://${PipelineBucketName}/debug/{training_job_name}/"
+                                "MaxNumberOfTrainingJobs": 4,
+                                "MaxParallelTrainingJobs": 2
                             },
-                        }
-            Description: Get the HyperParameter of the Best Tuning Job
-            TracingConfig:
-                Mode: Active
-
-    LambdaFunctionBestHyper:
-        Type: AWS::Lambda::Function
-        Properties:
-            FunctionName: "getSMTuningStepBestHyperParameters"
-            Runtime: python3.6
-            Timeout: 900
-            MemorySize: 128
-            Role: !GetAtt LambdaIAMRole.Arn
-            Handler: index.lambda_handler
-            Code:
-                ZipFile: |
-                    import boto3
-                    def lambda_handler(event, context):
-                        sm_client = boto3.client("sagemaker")
-                        job = sm_client.describe_training_job(TrainingJobName=event['TrainingJobName']['TrainingJobName'])
-                        hyper_parameters = job['HyperParameters']
-                        return {
-                            'statusCode': 200,
-                            'body': {
-                            'bestTrainingJobName': event['TrainingJobName']['TrainingJobName'],
-                            'bestHyperParameter': hyper_parameters,
+                            "TrainingJobEarlyStoppingType": "Auto",
+                            "HyperParameterTuningJobObjective": {
+                                "Type": "Maximize",
+                                "MetricName": "validation:auc"
+                            },
+                            "ParameterRanges": {
+                                "ContinuousParameterRanges": [
+                                    {
+                                        "Name": "eta",
+                                        "MinValue": "0",
+                                        "MaxValue": "1",
+                                        "ScalingType": "Auto"
+                                    },
+                                    {
+                                        "Name": "min_child_weight",
+                                        "MinValue": "1",
+                                        "MaxValue": "10",
+                                        "ScalingType": "Auto"
+                                    },
+                                    {
+                                        "Name": "alpha",
+                                        "MinValue": "0",
+                                        "MaxValue": "2",
+                                        "ScalingType": "Auto"
+                                    }
+                                ],
+                                "CategoricalParameterRanges": [],
+                                "IntegerParameterRanges": [
+                                    {
+                                        "Name": "max_depth",
+                                        "MinValue": "1",
+                                        "MaxValue": "10",
+                                        "ScalingType": "Auto"
+                                    }
+                                ]
+                            }
+                        },
+                        "TrainingJobDefinition": {
+                            "AlgorithmSpecification": {
+                                "TrainingImage": "${XgbImageID}.dkr.ecr.${AWS::Region}.amazonaws.com/sagemaker-xgboost:1.2-1",
+                                "TrainingInputMode": "File"
+                            },
+                            "OutputDataConfig": {
+                                "S3OutputPath": "s3://${PipelineBucketName}/tuner/"
+                            },
+                            "StoppingCondition": {
+                                "MaxRuntimeInSeconds": 86400
+                            },
+                            "ResourceConfig": {
+                                "InstanceCount": 1,
+                                "InstanceType": "ml.m4.xlarge",
+                                "VolumeSizeInGB": 30
+                            },
+                            "RoleArn": "arn:aws:iam::${AWS::AccountId}:role/service-role/AmazonSageMaker-ExecutionRole-TrainingInferencePipeline",
+                            "InputDataConfig": [
+                                {
+                                    "DataSource": {
+                                        "S3DataSource": {
+                                            "S3DataType": "S3Prefix",
+                                            "S3Uri": "s3://${PipelineBucketName}/data/train_data",
+                                            "S3DataDistributionType": "FullyReplicated"
+                                        }
+                                    },
+                                    "ContentType": "text/csv",
+                                    "ChannelName": "train"
+                                },
+                                {
+                                    "DataSource": {
+                                        "S3DataSource": {
+                                            "S3DataType": "S3Prefix",
+                                            "S3Uri": "s3://${PipelineBucketName}/data/test_data",
+                                            "S3DataDistributionType": "FullyReplicated"
+                                        }
+                                    },
+                                    "ContentType": "text/csv",
+                                    "ChannelName": "validation"
+                                }
+                            ],
+                            "StaticHyperParameters": {
+                                "eval_metric": "auc",
+                                "objective": "binary:logistic",
+                                "num_round": "5",
+                                "tweedie_variance_power": "1.4"
                             }
                         }
-            Description: Get the HyperParameter of the Best Tuning Job
-            TracingConfig:
-                Mode: Active
-
-    LambdaIAMRole:
-        Type: "AWS::IAM::Role"
-        Properties:
-            AssumeRolePolicyDocument:
-                Version: 2012-10-17
-                Statement:
-                    - Effect: Allow
-                      Principal:
-                          Service:
-                              - lambda.amazonaws.com
-                      Action:
-                          - "sts:AssumeRole"
-            Path: /
-            MaxSessionDuration: 3600
-            ManagedPolicyArns:
-                - "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
-                - "arn:aws:iam::aws:policy/AWSStepFunctionsFullAccess"
-                - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
-                - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-            # Policies:
-            #   - PolicyName: allow_lambda_to_log
-            #     PolicyDocument:
-            #       Version: 2012-10-17
-            #       Statement:
-            #         - Effect: Allow
-            #           Action:
-            #             - "logs:CreateLogGroup"
-            #             - "logs:CreateLogStream"
-            #             - "logs:PutLogEvents"
-            #           Resource:
-            #             - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/getSMTuningStepBestHyperParameters:*"
-            #             - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/getSageMakerModelUrl:*"
-
-    LambdaFunctionInvokeTrain:
-        Type: AWS::Lambda::Function
-        Properties:
-            FunctionName: "invokeTrainingStepFunction"
-            Runtime: python3.6
-            Timeout: 900
-            MemorySize: 128
-            Role: !GetAtt LambdaIAMRole.Arn
-            Handler: index.lambda_handler
-            Code:
-                ZipFile: !Sub |
-                    import json
-                    import boto3
-                    import pprint
-                    import uuid
-
-                    #initialize
-                    pp = pprint.PrettyPrinter(indent=4)
-
-                    def lambda_handler(event, context):
-                        '''
-                        triggers a step function from the S3 landing event, 
-                        passing along the S3 file info
-                        '''
-                        
-                        #Fallback tests for initializations outside scope
-                        try:
-                            pp
-                        except NameError:
-                            pp = pprint.PrettyPrinter(indent=4)
-
-                        training_job_name = "scikit-learn-training-{}".format(
-                            uuid.uuid1().hex,
-                        )  # Each Training Job requires a unique name
-                        preprocessing_job_name = "scikit-learn-sm-preprocessing-{}".format(
-                            uuid.uuid1().hex,
-                        )  # Each Preprocessing job requires a unique name,
-                        hyperparametertunning_job_name = f"scikit-learn-tune-{uuid.uuid1().hex}"[
-                            :30
-                        ]  # Each Preprocessing job requires a unique name,
-                        
-                        model_name = f"scikit-learn-model-{uuid.uuid1().hex}"
-                        
-                        evaluation_job_name = "scikit-learn-sm-evaluation-{}".format(
-                            uuid.uuid1().hex,
-                        )  # Each Evaluation Job requires a unique name
-                        
-                        input= {
-                            "PreprocessingJobName": preprocessing_job_name,
-                            "TuningJobName": hyperparametertunning_job_name,
-                            "TrainingJobName": training_job_name,
-                            "ModelName": model_name,
-                            "EvaluationProcessingJobName": evaluation_job_name,
+                    },
+                    "Type": "Task",
+                    "Next": "SageMaker Step Getting Best HyperParameter",
+                    "Catch": [
+                        {
+                            "ErrorEquals": [
+                                "States.TaskFailed"
+                            ],
+                            "Next": "ML Workflow failed"
                         }
-                            
-                        stepFunction = boto3.client('stepfunctions')
-                        response = stepFunction.start_execution(
-                            stateMachineArn='arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:SageMakerPreproTrainWorkflow',
-                            input = json.dumps(input, indent=4)
-                        )
-                            
-                        s3 = boto3.resource("s3")
-                        s3.Bucket("${PipelineBucketName}").put_object(
-                            Key="model/ledger/model_name.txt", 
-                            Body=model_name.encode("utf-8")
-                          )
-                        return pp.pprint(response)
-            Description: Invoke Training Step Function Pipeline
-            TracingConfig:
-                Mode: Active
-
-    LambdaFunctionInvokeInfer:
-        Type: AWS::Lambda::Function
-        Properties:
-            FunctionName: "invokeInferStepFunction"
-            Runtime: python3.6
-            Timeout: 900
-            MemorySize: 128
-            Role: !GetAtt LambdaIAMRole.Arn
-            Handler: index.lambda_handler
-            Code:
-                ZipFile: !Sub |
-                    import json
-                    import boto3
-                    import pprint
-                    import uuid
-
-                    #initialize
-                    pp = pprint.PrettyPrinter(indent=4)
-
-                    def lambda_handler(event, context):
-                        '''
-                        triggers a step function from the S3 landing event, 
-                        passing along the S3 file info
-                        '''
-                        
-                        #Fallback tests for initializations outside scope
-                        try:
-                            pp
-                        except NameError:
-                            pp = pprint.PrettyPrinter(indent=4)
-                            
-                        # Generate unique names for Preprocessing Job, Training Job,
-                        # and Model Evaluation Job for the Step Functions Workflow
-                        inference_job_preproc_name = "scikit-learn-infer-preprocessing-{}".format(
-                            uuid.uuid1().hex,
-                        )[
-                            :60
-                        ]  # Each Training Job requires a unique name
-                        
-                        inference_job_predict_name = "scikit-learn-infer-predict-{}".format(
-                            uuid.uuid1().hex,
-                        )  # Each Training Job requires a unique name
-                        
-                        
-                        s3 = boto3.resource('s3')
-                        obj = s3.Object("${PipelineBucketName}", "model/ledger/model_name.txt")
-                        model_name = obj.get()['Body'].read().decode("utf-8")
-                        print(model_name)
-                        
-                        input= {
-                            "PreprocessingJobName": inference_job_preproc_name,
-                            "InferencingJobName": inference_job_predict_name,
-                            "ModelName": model_name,
+                    ]
+                },
+                "SageMaker Step Getting Best HyperParameter": {
+                    "Parameters": {
+                        "FunctionName": "${LambdaFunctionBestHyper}",
+                        "Payload": {
+                            "TrainingJobName.$": "$.BestTrainingJob"
                         }
-                            
-                        stepFunction = boto3.client('stepfunctions')
-                        response = stepFunction.start_execution(
-                            stateMachineArn='arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:SageMakerPreproInferWorkflow',
-                            input = json.dumps(input, indent=4)
-                        )
-                        
-                        return pp.pprint(response)
-            Description: Invoke Inference Step Function Pipeline
-            TracingConfig:
-                Mode: Active
+                    },
+                    "OutputPath": "$.Payload.body.bestHyperParameter",
+                    "Resource": "arn:aws:states:::lambda:invoke",
+                    "Type": "Task",
+                    "Next": "SageMaker Training Step",
+                    "Catch": [
+                        {
+                            "ErrorEquals": [
+                                "States.TaskFailed"
+                            ],
+                            "Next": "ML Workflow failed"
+                        }
+                    ]
+                },
+                "SageMaker Training Step": {
+                    "Resource": "arn:aws:states:::sagemaker:createTrainingJob.sync",
+                    "Parameters": {
+                        "AlgorithmSpecification": {
+                            "TrainingImage": "${XgbImageID}.dkr.ecr.${AWS::Region}.amazonaws.com/sagemaker-xgboost:1.2-1",
+                            "TrainingInputMode": "File"
+                        },
+                        "OutputDataConfig": {
+                            "S3OutputPath": "s3://${PipelineBucketName}/config"
+                        },
+                        "StoppingCondition": {
+                            "MaxRuntimeInSeconds": 1800
+                        },
+                        "ResourceConfig": {
+                            "InstanceCount": 3,
+                            "InstanceType": "ml.m5.4xlarge",
+                            "VolumeSizeInGB": 30
+                        },
+                        "RoleArn": "arn:aws:iam::${AWS::AccountId}:role/service-role/AmazonSageMaker-ExecutionRole-TrainingInferencePipeline",
+                        "InputDataConfig": [
+                            {
+                                "DataSource": {
+                                    "S3DataSource": {
+                                        "S3DataType": "S3Prefix",
+                                        "S3Uri": "s3://${PipelineBucketName}/data/train_data",
+                                        "S3DataDistributionType": "FullyReplicated"
+                                    }
+                                },
+                                "ContentType": "text/csv",
+                                "ChannelName": "train"
+                            },
+                            {
+                                "DataSource": {
+                                    "S3DataSource": {
+                                        "S3DataType": "S3Prefix",
+                                        "S3Uri": "s3://${PipelineBucketName}/data/test_data",
+                                        "S3DataDistributionType": "FullyReplicated"
+                                    }
+                                },
+                                "ContentType": "text/csv",
+                                "ChannelName": "validation"
+                            }
+                        ],
+                        "TrainingJobName.$": "$$.Execution.Input['TrainingJobName']",
+                        "DebugHookConfig": {
+                            "S3OutputPath": "s3://${PipelineBucketName}/debug",
+                            "HookParameters": {
+                                "save_interval": "5",
+                                "include_regex": ".*"
+                            },
+                            "CollectionConfigurations": [
+                                {
+                                    "CollectionName": "metrics"
+                                },
+                                {
+                                    "CollectionName": "feature_importance"
+                                },
+                                {
+                                    "CollectionName": "full_shap"
+                                },
+                                {
+                                    "CollectionName": "average_shap"
+                                }
+                            ]
+                        },
+                        "DebugRuleConfigurations": [
+                            {
+                                "RuleConfigurationName": "LossNotDecreasing",
+                                "RuleEvaluatorImage": "${DebuggerImageId}.dkr.ecr.${AWS::Region}.amazonaws.com/sagemaker-debugger-rules:latest",
+                                "RuleParameters": {
+                                    "rule_to_invoke": "LossNotDecreasing",
+                                    "collection_names": "metrics",
+                                    "num_steps": "10"
+                                }
+                            }
+                        ],
+                        "HyperParameters.$": "$"
+                    },
+                    "Type": "Task",
+                    "Next": "SageMaker Step Save Model",
+                    "Catch": [
+                        {
+                            "ErrorEquals": [
+                                "States.TaskFailed"
+                            ],
+                            "Next": "ML Workflow failed"
+                        }
+                    ]
+                },
+                "SageMaker Step Save Model": {
+                    "Parameters": {
+                        "ExecutionRoleArn": "arn:aws:iam::${AWS::AccountId}:role/service-role/AmazonSageMaker-ExecutionRole-TrainingInferencePipeline",
+                        "ModelName.$": "$$.Execution.Input['ModelName']",
+                        "PrimaryContainer": {
+                            "Environment": {},
+                            "Image": "${XgbImageID}.dkr.ecr.${AWS::Region}.amazonaws.com/sagemaker-xgboost:1.2-1",
+                            "ModelDataUrl.$": "$['ModelArtifacts']['S3ModelArtifacts']"
+                        }
+                    },
+                    "Resource": "arn:aws:states:::sagemaker:createModel",
+                    "Type": "Task",
+                    "Next": "SageMaker Step Get Model Url",
+                    "Catch": [
+                        {
+                            "ErrorEquals": [
+                                "States.TaskFailed"
+                            ],
+                            "Next": "ML Workflow failed"
+                        }
+                    ]
+                },
+                "SageMaker Step Get Model Url": {
+                    "Parameters": {
+                        "FunctionName": "${LambdaFunctionGetModelData}",
+                        "Payload": {
+                            "TrainingJobName.$": "$"
+                        }
+                    },
+                    "OutputPath": "$.Payload.body",
+                    "Resource": "arn:aws:states:::lambda:invoke",
+                    "Type": "Task",
+                    "Next": "SageMaker Step Model Explainability",
+                    "Catch": [
+                        {
+                            "ErrorEquals": [
+                                "States.TaskFailed"
+                            ],
+                            "Next": "ML Workflow failed"
+                        }
+                    ]
+                },
+                "SageMaker Step Model Explainability": {
+                    "Resource": "arn:aws:states:::sagemaker:createProcessingJob.sync",
+                    "Parameters": {
+                        "ProcessingJobName.$": "$$.Execution.Input['EvaluationProcessingJobName']",
+                        "ProcessingInputs": [
+                            {
+                                "InputName": "train_data",
+                                "AppManaged": false,
+                                "S3Input": {
+                                    "S3Uri": "s3://${PipelineBucketName}/data/train_data",
+                                    "LocalPath": "/opt/ml/processing/train",
+                                    "S3DataType": "S3Prefix",
+                                    "S3InputMode": "File",
+                                    "S3DataDistributionType": "FullyReplicated",
+                                    "S3CompressionType": "None"
+                                }
+                            },
+                            {
+                                "InputName": "test_data",
+                                "AppManaged": false,
+                                "S3Input": {
+                                    "S3Uri": "s3://${PipelineBucketName}/data/test_data",
+                                    "LocalPath": "/opt/ml/processing/test",
+                                    "S3DataType": "S3Prefix",
+                                    "S3InputMode": "File",
+                                    "S3DataDistributionType": "FullyReplicated",
+                                    "S3CompressionType": "None"
+                                }
+                            },
+                            {
+                                "InputName": "model",
+                                "AppManaged": false,
+                                "S3Input": {
+                                    "S3Uri.$": "$['modelDataUrl']",
+                                    "LocalPath": "/opt/ml/processing/model",
+                                    "S3DataType": "S3Prefix",
+                                    "S3InputMode": "File",
+                                    "S3DataDistributionType": "FullyReplicated",
+                                    "S3CompressionType": "None"
+                                }
+                            },
+                            {
+                                "InputName": "code",
+                                "AppManaged": false,
+                                "S3Input": {
+                                    "S3Uri": "s3://${PipelineBucketName}/script/evaluation.py",
+                                    "LocalPath": "/opt/ml/processing/input/code",
+                                    "S3DataType": "S3Prefix",
+                                    "S3InputMode": "File",
+                                    "S3DataDistributionType": "FullyReplicated",
+                                    "S3CompressionType": "None"
+                                }
+                            },
+                            {
+                                "InputName": "shap",
+                                "AppManaged": false,
+                                "S3Input": {
+                                    "S3Uri.$": "$['train_debug_path']",
+                                    "LocalPath": "/opt/ml/processing/debug/",
+                                    "S3DataType": "S3Prefix",
+                                    "S3InputMode": "File",
+                                    "S3DataDistributionType": "FullyReplicated",
+                                    "S3CompressionType": "None"
+                                }
+                            }
+                        ],
+                        "ProcessingOutputConfig": {
+                            "Outputs": [
+                                {
+                                    "OutputName": "evaluation",
+                                    "AppManaged": false,
+                                    "S3Output": {
+                                        "S3Uri": "s3://${PipelineBucketName}/evaluation/metric",
+                                        "LocalPath": "/opt/ml/processing/evaluation",
+                                        "S3UploadMode": "EndOfJob"
+                                    }
+                                },
+                                {
+                                    "OutputName": "plot",
+                                    "AppManaged": false,
+                                    "S3Output": {
+                                        "S3Uri": "s3://${PipelineBucketName}/evaluation/shap",
+                                        "LocalPath": "/opt/ml/processing/plot",
+                                        "S3UploadMode": "EndOfJob"
+                                    }
+                                }
+                            ]
+                        },
+                        "AppSpecification": {
+                            "ImageUri": "${XgbImageID}.dkr.ecr.${AWS::Region}.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
+                            "ContainerEntrypoint": [
+                                "python3",
+                                "/opt/ml/processing/input/code/evaluation.py"
+                            ]
+                        },
+                        "RoleArn": "arn:aws:iam::${AWS::AccountId}:role/service-role/AmazonSageMaker-ExecutionRole-TrainingInferencePipeline",
+                        "ProcessingResources": {
+                            "ClusterConfig": {
+                                "InstanceCount": 1,
+                                "InstanceType": "ml.m5.xlarge",
+                                "VolumeSizeInGB": 30
+                            }
+                        },
+                        "StoppingCondition": {
+                            "MaxRuntimeInSeconds": 1200
+                        }
+                    },
+                    "Type": "Task",
+                    "End": true,
+                    "Catch": [
+                        {
+                            "ErrorEquals": [
+                                "States.TaskFailed"
+                            ],
+                            "Next": "ML Workflow failed"
+                        }
+                    ]
+                },
+                "ML Workflow failed": {
+                    "Cause": "SageMakerProcessingJobFailed",
+                    "Type": "Fail"
+                }
+            }
+          }
+        - {
+            XgbImageID:
+              !FindInMap [
+                AWSRegionArch2XGBoostImageRegistry,
+                !Ref "AWS::Region",
+                id,
+              ],
+            DebuggerImageId:
+              !FindInMap [
+                AWSRegionArch2DebuggerImageRegistry,
+                !Ref "AWS::Region",
+                id,
+              ],
+          }
+      RoleArn: !GetAtt IAMRoleStepFunction.Arn
+      StateMachineType: "STANDARD"
+      LoggingConfiguration:
+        # Destinations:
+        # - CloudWatchLogsLogGroup:
+        # LogGroupArn: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/vendedlogs/states/SageMakerProcessTrainWorkflow-Log:*"
+        IncludeExecutionData: true
+        Level: "OFF"
+
+  StepFunctionsStateMachineInference:
+    Type: "AWS::StepFunctions::StateMachine"
+    Properties:
+      StateMachineName: "SageMakerPreproInferWorkflow"
+      DefinitionString: !Sub
+        - |
+          {
+            "StartAt": "SageMaker Inference Step Preprocessing",
+            "States": {
+                "SageMaker Inference Step Preprocessing": {
+                    "Resource": "arn:aws:states:::sagemaker:createProcessingJob.sync",
+                    "Parameters": {
+                        "ProcessingJobName.$": "$$.Execution.Input['PreprocessingJobName']",
+                        "ProcessingInputs": [
+                            {
+                                "InputName": "code",
+                                "AppManaged": false,
+                                "S3Input": {
+                                    "S3Uri": "s3://${PipelineBucketName}/script/inferpreprocessing.py",
+                                    "LocalPath": "/opt/ml/processing/input/code",
+                                    "S3DataType": "S3Prefix",
+                                    "S3InputMode": "File",
+                                    "S3DataDistributionType": "FullyReplicated",
+                                    "S3CompressionType": "None"
+                                }
+                            },
+                            {
+                                "InputName": "processing_joblib",
+                                "AppManaged": false,
+                                "S3Input": {
+                                    "S3Uri": "s3://${PipelineBucketName}/model/preprocessor/preprocessor.joblib",
+                                    "LocalPath": "/opt/ml/processing/transformer",
+                                    "S3DataType": "S3Prefix",
+                                    "S3InputMode": "File",
+                                    "S3DataDistributionType": "FullyReplicated",
+                                    "S3CompressionType": "None"
+                                }
+                            }
+                        ],
+                        "ProcessingOutputConfig": {
+                            "Outputs": [
+                                {
+                                    "OutputName": "infer_data",
+                                    "AppManaged": false,
+                                    "S3Output": {
+                                        "S3Uri": "s3://${PipelineBucketName}/data/intermediate/infer_data",
+                                        "LocalPath": "/opt/ml/processing/infer",
+                                        "S3UploadMode": "EndOfJob"
+                                    }
+                                }
+                            ]
+                        },
+                        "AppSpecification": {
+                            "ImageUri": "${XgbImageID}.dkr.ecr.${AWS::Region}.amazonaws.com/sagemaker-scikit-learn:0.20.0-cpu-py3",
+                            "ContainerArguments": [
+                                "--database",
+                                "${AthenaDatabaseName}",
+                                "--region",
+                                "${AWS::Region}",
+                                "--table",
+                                "infer"
+                            ],
+                            "ContainerEntrypoint": [
+                                "python3",
+                                "/opt/ml/processing/input/code/inferpreprocessing.py"
+                            ]
+                        },
+                        "RoleArn": "arn:aws:iam::${AWS::AccountId}:role/service-role/AmazonSageMaker-ExecutionRole-TrainingInferencePipeline",
+                        "ProcessingResources": {
+                            "ClusterConfig": {
+                                "InstanceCount": 1,
+                                "InstanceType": "ml.m5.xlarge",
+                                "VolumeSizeInGB": 30
+                            }
+                        },
+                        "StoppingCondition": {
+                            "MaxRuntimeInSeconds": 1200
+                        }
+                    },
+                    "Type": "Task",
+                    "Next": "Transform Input Dataset",
+                    "Catch": [
+                        {
+                            "ErrorEquals": [
+                                "States.TaskFailed"
+                            ],
+                            "Next": "ML Workflow failed"
+                        }
+                    ]
+                },
+                "Transform Input Dataset": {
+                    "Resource": "arn:aws:states:::sagemaker:createTransformJob.sync",
+                    "Parameters": {
+                        "TransformJobName.$": "$$.Execution.Input['InferencingJobName']",
+                        "ModelName.$": "$$.Execution.Input['ModelName']",
+                        "TransformInput": {
+                            "DataSource": {
+                                "S3DataSource": {
+                                    "S3DataType": "S3Prefix",
+                                    "S3Uri": "s3://${PipelineBucketName}/data/intermediate/infer_data"
+                                }
+                            },
+                            "ContentType": "text/csv"
+                        },
+                        "TransformOutput": {
+                            "S3OutputPath": "s3://${PipelineBucketName}/data/inference_result"
+                        },
+                        "TransformResources": {
+                            "InstanceCount": 1,
+                            "InstanceType": "ml.m5.large"
+                        }
+                    },
+                    "Type": "Task",
+                    "End": true,
+                    "Catch": [
+                        {
+                            "ErrorEquals": [
+                                "States.TaskFailed"
+                            ],
+                            "Next": "ML Workflow failed"
+                        }
+                    ]
+                },
+                "ML Workflow failed": {
+                    "Cause": "SageMakerProcessingJobFailed",
+                    "Type": "Fail"
+                }
+            }
+          }
+        - {
+            XgbImageID:
+              !FindInMap [
+                AWSRegionArch2XGBoostImageRegistry,
+                !Ref "AWS::Region",
+                id,
+              ],
+          }
+      RoleArn: !GetAtt IAMRoleStepFunction.Arn
+      StateMachineType: "STANDARD"
+      LoggingConfiguration:
+        # Destinations:
+        # - CloudWatchLogsLogGroup:
+        # LogGroupArn: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/vendedlogs/states/SageMakerProcessingInferWorkflow-Log:*"
+        IncludeExecutionData: true
+        Level: "OFF"
+
+  LambdaFunctionGetModelData:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: "getSageMakerModelUrl"
+      Runtime: python3.6
+      Timeout: 900
+      MemorySize: 128
+      Role: !GetAtt LambdaIAMRole.Arn
+      Handler: index.lambda_handler
+      Code:
+        ZipFile: !Sub |
+          import boto3
+
+          def lambda_handler(event, context):
+              sm_client = boto3.client("sagemaker")
+
+              job = sm_client.describe_model(
+                  ModelName=event["TrainingJobName"]["ModelArn"].split("/")[-1]
+              )
+              training_job_name = job["PrimaryContainer"]["ModelDataUrl"].split('/')[-3]
+
+              return {
+                  "statusCode": 200,
+                  "body": {
+                      "modelDataUrl": job["PrimaryContainer"]["ModelDataUrl"],
+                      "train_debug_path": f"s3://${PipelineBucketName}/debug/{training_job_name}/"
+                  },
+              }
+      Description: Get the HyperParameter of the Best Tuning Job
+      TracingConfig:
+        Mode: Active
+
+  LambdaFunctionBestHyper:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: "getSMTuningStepBestHyperParameters"
+      Runtime: python3.6
+      Timeout: 900
+      MemorySize: 128
+      Role: !GetAtt LambdaIAMRole.Arn
+      Handler: index.lambda_handler
+      Code:
+        ZipFile: |
+          import boto3
+          def lambda_handler(event, context):
+              sm_client = boto3.client("sagemaker")
+              job = sm_client.describe_training_job(TrainingJobName=event['TrainingJobName']['TrainingJobName'])
+              hyper_parameters = job['HyperParameters']
+              return {
+                  'statusCode': 200,
+                  'body': {
+                  'bestTrainingJobName': event['TrainingJobName']['TrainingJobName'],
+                  'bestHyperParameter': hyper_parameters,
+                  }
+              }
+      Description: Get the HyperParameter of the Best Tuning Job
+      TracingConfig:
+        Mode: Active
+
+  LambdaIAMRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Path: /
+      MaxSessionDuration: 3600
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
+        - "arn:aws:iam::aws:policy/AWSStepFunctionsFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      # Policies:
+      #   - PolicyName: allow_lambda_to_log
+      #     PolicyDocument:
+      #       Version: 2012-10-17
+      #       Statement:
+      #         - Effect: Allow
+      #           Action:
+      #             - "logs:CreateLogGroup"
+      #             - "logs:CreateLogStream"
+      #             - "logs:PutLogEvents"
+      #           Resource:
+      #             - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/getSMTuningStepBestHyperParameters:*"
+      #             - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/getSageMakerModelUrl:*"
+
+  LambdaFunctionInvokeTrain:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: "invokeTrainingStepFunction"
+      Runtime: python3.6
+      Timeout: 900
+      MemorySize: 128
+      Role: !GetAtt LambdaIAMRole.Arn
+      Handler: index.lambda_handler
+      Code:
+        ZipFile: !Sub |
+          import json
+          import boto3
+          import pprint
+          import uuid
+
+          #initialize
+          pp = pprint.PrettyPrinter(indent=4)
+
+          def lambda_handler(event, context):
+              '''
+              triggers a step function from the S3 landing event,
+              passing along the S3 file info
+              '''
+
+              #Fallback tests for initializations outside scope
+              try:
+                  pp
+              except NameError:
+                  pp = pprint.PrettyPrinter(indent=4)
+
+              training_job_name = "scikit-learn-training-{}".format(
+                  uuid.uuid1().hex,
+              )  # Each Training Job requires a unique name
+              preprocessing_job_name = "scikit-learn-sm-preprocessing-{}".format(
+                  uuid.uuid1().hex,
+              )  # Each Preprocessing job requires a unique name,
+              hyperparametertunning_job_name = f"scikit-learn-tune-{uuid.uuid1().hex}"[
+                  :30
+              ]  # Each Preprocessing job requires a unique name,
+
+              model_name = f"scikit-learn-model-{uuid.uuid1().hex}"
+
+              evaluation_job_name = "scikit-learn-sm-evaluation-{}".format(
+                  uuid.uuid1().hex,
+              )  # Each Evaluation Job requires a unique name
+
+              input= {
+                  "PreprocessingJobName": preprocessing_job_name,
+                  "TuningJobName": hyperparametertunning_job_name,
+                  "TrainingJobName": training_job_name,
+                  "ModelName": model_name,
+                  "EvaluationProcessingJobName": evaluation_job_name,
+              }
+
+              stepFunction = boto3.client('stepfunctions')
+              response = stepFunction.start_execution(
+                  stateMachineArn='arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:SageMakerPreproTrainWorkflow',
+                  input = json.dumps(input, indent=4)
+              )
+
+              s3 = boto3.resource("s3")
+              s3.Bucket("${PipelineBucketName}").put_object(
+                  Key="model/ledger/model_name.txt",
+                  Body=model_name.encode("utf-8")
+                )
+              return pp.pprint(response)
+      Description: Invoke Training Step Function Pipeline
+      TracingConfig:
+        Mode: Active
+
+  LambdaFunctionInvokeInfer:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: "invokeInferStepFunction"
+      Runtime: python3.6
+      Timeout: 900
+      MemorySize: 128
+      Role: !GetAtt LambdaIAMRole.Arn
+      Handler: index.lambda_handler
+      Code:
+        ZipFile: !Sub |
+          import json
+          import boto3
+          import pprint
+          import uuid
+
+          #initialize
+          pp = pprint.PrettyPrinter(indent=4)
+
+          def lambda_handler(event, context):
+              '''
+              triggers a step function from the S3 landing event,
+              passing along the S3 file info
+              '''
+
+              #Fallback tests for initializations outside scope
+              try:
+                  pp
+              except NameError:
+                  pp = pprint.PrettyPrinter(indent=4)
+
+              # Generate unique names for Preprocessing Job, Training Job,
+              # and Model Evaluation Job for the Step Functions Workflow
+              inference_job_preproc_name = "scikit-learn-infer-preprocessing-{}".format(
+                  uuid.uuid1().hex,
+              )[
+                  :60
+              ]  # Each Training Job requires a unique name
+
+              inference_job_predict_name = "scikit-learn-infer-predict-{}".format(
+                  uuid.uuid1().hex,
+              )  # Each Training Job requires a unique name
+
+
+              s3 = boto3.resource('s3')
+              obj = s3.Object("${PipelineBucketName}", "model/ledger/model_name.txt")
+              model_name = obj.get()['Body'].read().decode("utf-8")
+              print(model_name)
+
+              input= {
+                  "PreprocessingJobName": inference_job_preproc_name,
+                  "InferencingJobName": inference_job_predict_name,
+                  "ModelName": model_name,
+              }
+
+              stepFunction = boto3.client('stepfunctions')
+              response = stepFunction.start_execution(
+                  stateMachineArn='arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:SageMakerPreproInferWorkflow',
+                  input = json.dumps(input, indent=4)
+              )
+
+              return pp.pprint(response)
+      Description: Invoke Inference Step Function Pipeline
+      TracingConfig:
+        Mode: Active
 
 Outputs:
-    StepFunctionTrainingPipeline:
-        Description: The StepFunction Pipeline for Training
-        Value: !GetAtt StepFunctionsStateMachineTraining.Arn
-        Export:
-            Name: StepFunctionTrainingPipeline
-    StepFunctionInferencePipeline:
-        Description: The StepFunction Pipeline for Inference
-        Value: !GetAtt StepFunctionsStateMachineInference.Arn
-        Export:
-            Name: StepFunctionInferencePipeline
-    LambdaFunctionTriggerTrain:
-        Description: The Lambda Trigger Training Pipeline
-        Value: !GetAtt LambdaFunctionInvokeTrain.Arn
-        Export:
-            Name: LambdaFunctionTriggerTraining
-    LambdaFunctionTriggerInfer:
-        Description: The Lambda Trigger Inference Pipeline
-        Value: !GetAtt LambdaFunctionInvokeInfer.Arn
-        Export:
-            Name: LambdaFunctionTriggerInference
+  StepFunctionTrainingPipeline:
+    Description: The StepFunction Pipeline for Training
+    Value: !GetAtt StepFunctionsStateMachineTraining.Arn
+    Export:
+      Name: StepFunctionTrainingPipeline
+  StepFunctionInferencePipeline:
+    Description: The StepFunction Pipeline for Inference
+    Value: !GetAtt StepFunctionsStateMachineInference.Arn
+    Export:
+      Name: StepFunctionInferencePipeline
+  LambdaFunctionTriggerTrain:
+    Description: The Lambda Trigger Training Pipeline
+    Value: !GetAtt LambdaFunctionInvokeTrain.Arn
+    Export:
+      Name: LambdaFunctionTriggerTraining
+  LambdaFunctionTriggerInfer:
+    Description: The Lambda Trigger Inference Pipeline
+    Value: !GetAtt LambdaFunctionInvokeInfer.Arn
+    Export:
+      Name: LambdaFunctionTriggerInference

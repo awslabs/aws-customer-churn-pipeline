@@ -8,12 +8,16 @@ from typing import List, Tuple
 
 
 def install(package):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+    subprocess.check_call(
+        [sys.executable, "-m", "pip", "install", package],
+        # quietly
+        stdout=open(os.devnull, "wb"),
+    )
 
 
 install("scikit-learn==0.24.1")
 install("awswrangler==2.4.0")
-install("Amazon-DenseClus")
+install("Amazon-DenseClus==0.0.7")
 
 import awswrangler as wr
 import boto3
