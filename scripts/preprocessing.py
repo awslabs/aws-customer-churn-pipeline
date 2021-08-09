@@ -12,18 +12,20 @@ def install(package):
 
 
 install("scikit-learn==0.24.1")
-install("sklearn_pandas==2.1.0")
 install("awswrangler==2.4.0")
+install("Amazon-DenseClus")
 
 import awswrangler as wr
 import boto3
 import joblib
 import pandas as pd
+from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import DataConversionWarning
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn_pandas import DataFrameMapper
+from denseclus import DenseClus
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -57,8 +59,6 @@ columns = list(col_type.keys())
 target_col = "churn?"
 class_labels = ["True.", "False."]
 
-
-# TO DO: more elegant way of doing this
 def split_col_dtype(col_type: dict, target_label: str) -> Tuple[List[str], List[str]]:
     """Split columns into categorical and numerical lists
 
@@ -124,6 +124,19 @@ def main(args):
         )
     )
 
+    # no fit predict method currently supported for DenseClus
+    # See: https://github.com/awslabs/amazon-denseclus/issues/4
+    if args.cluster == True:
+
+        logger.info("Clustering data")
+        clf = DenseClus()
+        clf.fit(df)
+        logger.info("Clusters fit")
+
+        df['segments'] = clf.score()
+        df['segments'] = df['segments'].astype(str)
+
+
     split_ratio = args.train_test_split_ratio
     logger.info(f"Splitting data into train and test sets with ratio {split_ratio}")
     X_train, X_test, y_train, y_test = train_test_split(
@@ -134,26 +147,37 @@ def main(args):
     )
     logger.info(X_train.dtypes)
 
-    # TO DO: use sklearn column_transfomer
-    cat, num = split_col_dtype(col_type, target_col)
-    preprocess = DataFrameMapper(
-        [([col], [SimpleImputer(strategy="median"), StandardScaler()]) for col in num]
-        + [
-            (
-                [col],
-                [
-                    SimpleImputer(strategy="constant", fill_value="missing"),
-                    OneHotEncoder(handle_unknown="ignore"),
-                ],
-            )
-            for col in cat
+    numerical_idx = X_train.select_dtypes(
+        exclude=["object", "category"]
+    ).columns.tolist()
+
+    categorical_idx = X_train.select_dtypes(exclude=["float", "int"]).columns.tolist()
+
+    numeric_transformer = Pipeline(
+        steps=[
+            ("imputer", SimpleImputer(strategy="median")),
+            ("scaler", StandardScaler()),
         ]
-        + [],
-        df_out=True,
     )
+
+    categorical_transformer = Pipeline(
+        steps=[
+            ("imputer", SimpleImputer(strategy="constant", fill_value="missing")),
+            ("onehot", OneHotEncoder(sparse=False, handle_unknown="ignore")),
+        ]
+    )
+
+    preprocessor = ColumnTransformer(
+        [
+            ("numerical", numeric_transformer, numerical_idx),
+            ("categorical", categorical_transformer, categorical_idx),
+        ],
+        remainder="passthrough",
+    )
+
     logger.info("Running preprocessing and feature engineering transformations")
-    train_features = preprocess.fit_transform(X_train)
-    test_features = preprocess.transform(X_test)
+    train_features = preprocessor.fit_transform(X_train)
+    test_features = preprocessor.transform(X_test)
 
     preprocessor_output_path = os.path.join(
         "/opt/ml/processing/transformer", "preprocessor.joblib"
@@ -189,6 +213,8 @@ if __name__ == "__main__":
     parser.add_argument("--table", type=str, required=True)
     parser.add_argument("--train-test-split-ratio", type=float, default=0.25)
     parser.add_argument("--random-state", type=float, default=123)
+    parser.add_argument("--cluster", default=False, type=bool
+    , help="Run clusters as part of preprocessing")
     args = parser.parse_args()
 
     main(args)
