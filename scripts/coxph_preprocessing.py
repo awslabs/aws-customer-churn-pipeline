@@ -15,8 +15,10 @@ def install(package):
     )
 
 
-install("awswrangler==2.4.0")
 install("scikit-learn==0.24.1")
+install("awswrangler==2.4.0")
+os.system("conda update conda -y")
+os.system("conda install -c conda-forge hdbscan -y")
 install("Amazon-DenseClus==0.0.7")
 
 import awswrangler as wr
