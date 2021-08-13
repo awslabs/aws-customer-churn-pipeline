@@ -25,6 +25,7 @@ aws cloudformation deploy \
     --parameter-overrides \
        AthenaDatabaseName=${DATABASE} \
        PipelineBucketName=${S3_BUCKET_NAME} \
-    --capabilities CAPABILITY_NAMED_IAM 
+    --capabilities CAPABILITY_NAMED_IAM \
+    --no-fail-on-empty-changeset
 
 
