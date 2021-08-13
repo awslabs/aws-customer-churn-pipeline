@@ -12,7 +12,6 @@ phases:
 
   pre_build:
     commands:
-      - source .env
       - echo "Begin s3 sync"
       - echo $S3_BUCKET_NAME
       - aws s3 sync ./scripts s3://$S3_BUCKET_NAME/script/
