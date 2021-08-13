@@ -32,7 +32,7 @@ Parameters:
     pBranchName:
       Description: Branch name where changes are to be detected
       Type: String
-      Default: "feature-CICD"
+      Default: "main"
     
     pGithubConnectionArn:
       Description: Connection arn for git

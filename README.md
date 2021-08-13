@@ -30,13 +30,13 @@ It provides:
 
 ## Quick Start
 
-    # Change the default parameters in .env. Set up the resources
+    # Default parameters are in .env file. To run with Cox proportional hazard modeling instead of binary logloss set COXPH to true. 
+    Deploy CICD pipeline.
     sh CICD/deploy_infrastructure.sh
-
 
     # This creates a code Pipeline that will automatically deploy the application. For the first time, update the pending Github connection manually in the console and release change in churn pipeline. This is a one time approval. 
     https://console.aws.amazon.com/codesuite/settings/connections
- 
+
     AWS_REGION=$(aws configure get region)
 
     # Trigger the training pipeline

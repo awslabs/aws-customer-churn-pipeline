@@ -24,7 +24,7 @@ phases:
   post_build:
     commands:
       - echo "Trigger step functions"
-      - aws lambda --region ${REGION} invoke --function-name invokeTrainingStepFunction --payload '{ "": ""}' out
+      #- aws lambda --region ${REGION} invoke --function-name invokeTrainingStepFunction --payload '{ "": ""}' out
 
 
 
