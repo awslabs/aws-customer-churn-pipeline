@@ -12,6 +12,7 @@ phases:
 
   pre_build:
     commands:
+      - source .env
       - echo "Begin s3 sync"
       - aws s3 sync ./scripts s3://${S3_BUCKET_NAME}/script/
       - aws s3 sync ./cfn/ s3://${S3_BUCKET_NAME}/cfn/
@@ -19,7 +20,6 @@ phases:
   build:
     commands:
       - echo "Deploy application"
-      - source .env
       - sh CICD/deploy_application.sh $COXPH
   post_build:
     commands:
