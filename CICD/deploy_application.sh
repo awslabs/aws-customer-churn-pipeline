@@ -1,22 +1,30 @@
-S3_BUCKET_NAME=$1
+echo $S3_BUCKET_NAME
+echo $AWS_REGION
+echo $STACK_NAME
 
-if [ $2 == true ]
+if [ $cCOXPH == true ]
 then
-    TEMPLATE="https://${S3_BUCKET_NAME}.s3.amazonaws.com/cfn/time_to_event_pipeline.yaml"    
+    TEMPLATE="cfn/time_to_event_pipeline.yaml"   
 else
-    TEMPLATE="https://${S3_BUCKET_NAME}.s3.amazonaws.com/cfn/classification_pipeline.yaml"
+    TEMPLATE="cfn/classification_pipeline.yaml"
 fi 
 
 echo "application template=${TEMPLATE}"
 
-aws glue --region ${REGION} start-crawler --name crawler-${STACK_NAME} > /dev/null
+aws glue --region ${AWS_REGION} start-crawler --name crawler-${STACK_NAME} 
 
 echo "Deploying Training and Inference Pipeline..."
 
-aws cloudformation --region ${REGION}  create-stack \
---stack-name ${STACK_NAME}-pipeline \
---template-url "${TEMPLATE}" \
---capabilities CAPABILITY_NAMED_IAM \
---parameters ParameterKey=AthenaDatabaseName,ParameterValue=${DATABASE} \
-ParameterKey=PipelineBucketName,ParameterValue=${S3_BUCKET_NAME} \
---disable-rollback > /dev/null
+
+aws cloudformation deploy \
+    --stack-name ${STACK_NAME}-pipeline \
+    --template-file ${TEMPLATE} \
+    --s3-bucket $S3_BUCKET_NAME\
+    --s3-prefix "codepipeline/application" \
+    --region ${AWS_REGION} \
+    --parameter-overrides \
+       AthenaDatabaseName=${DATABASE} \
+       PipelineBucketName=${S3_BUCKET_NAME} \
+    --capabilities CAPABILITY_NAMED_IAM 
+
+

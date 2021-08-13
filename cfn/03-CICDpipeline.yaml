@@ -37,6 +37,18 @@ Parameters:
     pGithubConnectionArn:
       Description: Connection arn for git
       Type: String
+
+    pRegion:
+      Description: AWS region to deploy 
+      Type: String
+    
+    pStackname:
+      Description: default stack name 
+      Type: String
+    
+    pCoxph:
+      Description: cox proportial hazards or binary logloss 
+      Type: String
    
 Resources:
 
@@ -138,19 +150,15 @@ Resources:
               - Effect: Allow
                 Action:
                   - "codestar-connections:UseConnection"
-                  - "codestar-connections:GetConnection"
-                  - "codestar-connections:ListConnections"
-                  - "codestar-connections:TagResource"
-                  - "codestar-connections:ListTagsForResource"
-                  - "codestar-connections:UntagResource"
                 Resource: "*"
               - Effect: Allow
                 Action:
-                  - "sagemaker:CreateTrainingJob"
-                  - "sagemaker:DescribeTrainingJob"
-                  - "sagemaker:StopTrainingJob"
-                  - "sagemaker:CreateProcessingJob"
+                  - "glue:StartCrawler"
                 Resource: '*'
+              - Effect: Allow
+                Action:
+                  - "cloudformation:CreateStack"
+                Resource: "*"
             
 
 ################## CodeBuild Stage and CodePipeline Pipeline ##############################
@@ -168,6 +176,19 @@ Resources:
         Type: LINUX_CONTAINER
         Image: !Ref pBuildImageName
         PrivilegedMode: true
+        EnvironmentVariables:
+          - Name: AWS_REGION
+            Type: PLAINTEXT
+            Value: !Ref pRegion
+          - Name: STACK_NAME
+            Type: PLAINTEXT
+            Value: !Ref pStackname
+          - Name: S3_BUCKET_NAME
+            Type: PLAINTEXT
+            Value: !Ref pSourceBucket
+          - Name: COXPH
+            Type: PLAINTEXT
+            Value: !Ref pCoxph
       TimeoutInMinutes: 120
       LogsConfig:
         CloudWatchLogs:

@@ -57,4 +57,7 @@ aws cloudformation deploy\
     pSourceBucket="$S3_BUCKET_NAME" \
     pBranchName="feature-CICD" \
     pGithubConnectionArn="$GITARN" \
+    pRegion="$REGION" \
+    pStackname="$STACK_NAME" \
+    pCoxph="$COXPH" \
     --capabilities CAPABILITY_NAMED_IAM

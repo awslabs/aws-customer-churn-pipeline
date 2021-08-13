@@ -14,15 +14,13 @@ phases:
     commands:
       - source .env
       - echo "Begin s3 sync"
-      - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-      - S3_BUCKET_NAME=${S3_BUCKET_NAME}-${ACCOUNT_ID}
       - aws s3 sync ./scripts s3://${S3_BUCKET_NAME}/script/
       - aws s3 sync ./cfn/ s3://${S3_BUCKET_NAME}/cfn/
       - aws s3 sync ./data s3://${S3_BUCKET_NAME}/demo/
   build:
     commands:
       - echo "Deploy application"
-      - sh CICD/deploy_application.sh $S3_BUCKET_NAME $COXPH 
+      - sh CICD/deploy_application.sh 
   post_build:
     commands:
       - echo "Trigger step functions"
