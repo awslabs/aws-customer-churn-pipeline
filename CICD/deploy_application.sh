@@ -1,8 +1,6 @@
-ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+S3_BUCKET_NAME=$1
 
-S3_BUCKET_NAME=${S3_BUCKET_NAME}-${ACCOUNT_ID}
-
-if [ $1 == true ]
+if [ $2 == true ]
 then
     TEMPLATE="https://${S3_BUCKET_NAME}.s3.amazonaws.com/cfn/time_to_event_pipeline.yaml"    
 else
