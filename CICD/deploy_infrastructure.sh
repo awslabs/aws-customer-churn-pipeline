@@ -55,6 +55,6 @@ aws cloudformation deploy\
     --parameter-overrides\
     pEnvironment="dev"\
     pSourceBucket="$S3_BUCKET_NAME" \
-    pBranchName="feature-CICD" \
+    pBranchName="main" \
     pGithubConnectionArn="$GITARN" \
     --capabilities CAPABILITY_NAMED_IAM

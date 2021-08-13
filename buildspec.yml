@@ -19,10 +19,12 @@ phases:
   build:
     commands:
       - echo "Deploy application"
-      - sh CICD/deploy_application.sh
+      - source .env
+      - sh CICD/deploy_application.sh $COXPH
   post_build:
     commands:
-      - echo "In post build"
+      - echo "Trigger step functions"
+      - aws lambda --region ${REGION} invoke --function-name invokeTrainingStepFunction --payload '{ "": ""}' out
 
 
 
