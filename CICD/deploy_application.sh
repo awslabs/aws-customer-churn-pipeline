@@ -2,7 +2,7 @@ echo $S3_BUCKET_NAME
 echo $AWS_REGION
 echo $STACK_NAME
 
-if [ $cCOXPH == true ]
+if [ $COXPH = true ]
 then
     TEMPLATE="cfn/time_to_event_pipeline.yaml"   
 else
@@ -11,7 +11,7 @@ fi
 
 echo "application template=${TEMPLATE}"
 
-aws glue --region ${AWS_REGION} start-crawler --name crawler-${STACK_NAME} 
+#aws glue --region ${AWS_REGION} start-crawler --name crawler-${STACK_NAME} 
 
 echo "Deploying Training and Inference Pipeline..."
 

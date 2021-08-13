@@ -158,6 +158,10 @@ Resources:
               - Effect: Allow
                 Action:
                   - "cloudformation:CreateStack"
+                  - "cloudformation:GetTemplateSummary"
+                  - "cloudformation:CreateChangeSet"
+                  - "cloudformation:DeleteStack"
+                  - "cloudformation:UpdateStack"
                 Resource: "*"
             
 
