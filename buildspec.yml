@@ -19,7 +19,7 @@ phases:
       - aws s3 sync ./data s3://$S3_BUCKET_NAME/demo/
   build:
     commands:
-      - echo "Triggerapplication"
-      - aws lambda invoke --function-name invokeTrainingStepFunction --payload '{"":""}' --region ${REGION} out
+      - echo "Trigger application"
+      - aws lambda invoke --function-name invokeTrainingStepFunction --payload '{"":""}' --region ${REGION} response.json
 
 
