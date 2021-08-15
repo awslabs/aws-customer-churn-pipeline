@@ -19,12 +19,7 @@ phases:
       - aws s3 sync ./data s3://$S3_BUCKET_NAME/demo/
   build:
     commands:
-      - echo "Deploy application"
-      - sh CICD/deploy_application.sh 
-  post_build:
-    commands:
-      - echo "Trigger step functions"
-      #- aws lambda --region ${REGION} invoke --function-name invokeTrainingStepFunction --payload '{ "": ""}' out
-
+      - echo "Triggerapplication"
+      - aws lambda --region ${REGION} invoke --function-name invokeTrainingStepFunction --payload '{"":""}'
 
 

@@ -2,8 +2,8 @@
 
 source .env 
 
+#Create S3 bucket
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-
 S3_BUCKET_NAME=${S3_BUCKET_NAME}-${ACCOUNT_ID}
 
 if aws s3 ls "s3://${S3_BUCKET_NAME}" 2>&1 | grep -q 'NoSuchBucket'
@@ -42,8 +42,6 @@ ParameterKey=CrawlerName,ParameterValue=crawler-${STACK_NAME} > /dev/null
 
 sleep 15
 
-GITARN=$(aws codestar-connections create-connection --provider-type GitHub --connection-name "churn_github_conn" --output text)
-
 echo "03) Building CICD pipeline..."
 
 aws cloudformation deploy\
@@ -56,7 +54,6 @@ aws cloudformation deploy\
     pEnvironment="dev"\
     pSourceBucket="$S3_BUCKET_NAME" \
     pBranchName="feature-CICD" \
-    pGithubConnectionArn="$GITARN" \
     pRegion="$REGION" \
     pStackname="$STACK_NAME" \
     pCoxph="$COXPH" \
