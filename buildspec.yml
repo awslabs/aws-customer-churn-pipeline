@@ -20,6 +20,6 @@ phases:
   build:
     commands:
       - echo "Trigger application"
-      - aws lambda invoke --function-name invokeTrainingStepFunction --payload '{"":""}' --region ${REGION} response.json
+      - aws lambda invoke --function-name invokeTrainingStepFunction --region ${REGION} out
 
 
