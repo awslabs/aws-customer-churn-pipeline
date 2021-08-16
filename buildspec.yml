@@ -1,6 +1,4 @@
 version: 0.2
-env:
-  shell: bash
 phases:
   install:
     runtime-versions:
@@ -12,14 +10,7 @@ phases:
 
   pre_build:
     commands:
-      - echo "Begin s3 sync"
-      - echo $S3_BUCKET_NAME
-      - aws s3 sync ./scripts s3://$S3_BUCKET_NAME/script/
-      - aws s3 sync ./cfn/ s3://$S3_BUCKET_NAME/cfn/
-      - aws s3 sync ./data s3://$S3_BUCKET_NAME/demo/
-  build:
-    commands:
-      - echo "Trigger application"
-      - aws lambda invoke --function-name invokeTrainingStepFunction --region ${REGION} out
+      - echo "Invoke step functions"
+      - aws lambda invoke --function-name invokeTrainingStepFunction --region us-east-1 out
 
 
