@@ -6,6 +6,8 @@ import sys
 import warnings
 from typing import List, Tuple
 
+import numpy as np
+
 
 def install(package):
     subprocess.check_call(
@@ -17,7 +19,8 @@ def install(package):
 
 install("scikit-learn==0.24.1")
 install("awswrangler==2.4.0")
-os.system("conda update conda -y")
+
+# os.system("conda update conda -y")
 os.system("conda install -c conda-forge hdbscan -y")
 install("Amazon-DenseClus==0.0.7")
 
@@ -190,8 +193,25 @@ def main(args):
     )
     joblib.dump(preprocessor, preprocessor_output_path)
 
-    logger.info(f"Train data shape after preprocessing: {train_features.shape}")
-    logger.info(f"Test data shape after preprocessing: {test_features.shape}")
+    logger.info(f"train features size {train_features.shape}")
+    logger.info(f"test features size {test_features.shape}")
+
+    # adding back the target as the first columan for XGB
+    train_features = np.hstack((y_train.values.reshape(-1, 1), train_features))
+    test_features = np.hstack((y_test.values.reshape(-1, 1), test_features))
+
+    # getting the feature names
+    feature_names = (
+        numerical_idx
+        + preprocessor.transformers_[1][1]["onehot"].get_feature_names().tolist()
+    )
+
+    feature_names = [target_col] + feature_names
+
+    preprocessor_output_path = os.path.join(
+        "/opt/ml/processing/transformer", "preprocessor.joblib"
+    )
+    joblib.dump(preprocessor, preprocessor_output_path)
 
     train_features_output_path = os.path.join(
         "/opt/ml/processing/train", "train_features.csv"
@@ -202,12 +222,13 @@ def main(args):
     )
 
     logger.info(f"Saving training data to {train_features_output_path}")
-    pd.concat([y_train, train_features], axis=1).to_csv(
+
+    pd.DataFrame(train_features, columns=feature_names).to_csv(
         train_features_output_path, header=True, index=False
     )
 
     logger.info(f"Saving test data to {test_features_output_path}")
-    pd.concat([y_test, test_features], axis=1).to_csv(
+    pd.DataFrame(test_features, columns=feature_names).to_csv(
         test_features_output_path, header=True, index=False
     )
 
