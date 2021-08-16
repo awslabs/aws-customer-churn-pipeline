@@ -42,9 +42,19 @@ Parameters:
       Type: String
     
     pCoxph:
-      Description: cox proportial hazards or binary logloss 
+      Description: positive=cox proportial hazards model, negative=binary logloss model
       Type: String
-   
+      AllowedValues:
+        - negative
+        - positive
+
+Mappings:
+  CoxMap:
+    positive:
+      "applstack": "cfn/time_to_event_pipeline.yaml"
+    negative:
+      "applstack": "cfn/classification_pipeline.yaml"
+
 Resources:
 
   LogGroup:
@@ -120,8 +130,6 @@ Resources:
       Path: /
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/CloudWatchFullAccess"
-        - "arn:aws:iam::aws:policy/AWSBackupFullAccess"
-        - "arn:aws:iam::aws:policy/AWSLambda_FullAccess"
       Policies:
         - PolicyName: CodeBuildBasePolicy-CodeBuildProject
           PolicyDocument:
@@ -155,21 +163,6 @@ Resources:
                 Action:
                   - "codestar-connections:UseConnection"
                 Resource: "*"
-              - Effect: Allow
-                Action:
-                  - "glue:StartCrawler"
-                Resource: '*'
-              - Effect: Allow
-                Action:
-                  - "cloudformation:CreateStack"
-                  - "cloudformation:GetTemplateSummary"
-                  - "cloudformation:CreateChangeSet"
-                  - "cloudformation:DeleteStack"
-                  - "cloudformation:UpdateStack"
-                  - "cloudformation:ExecuteChangeSet"
-                  - "cloudformation:CreateChangeSet"
-                  - "cloudformation:*"
-                Resource: "*"
             
 ################## GITHUB connection to CodePipeline ######################################
   ChurnGitConnection:
@@ -189,7 +182,7 @@ Resources:
         Type: CODEPIPELINE
         BuildSpec: buildspec.yml
       Environment:
-        ComputeType: BUILD_GENERAL1_LARGE
+        ComputeType: BUILD_GENERAL1_MEDIUM
         Type: LINUX_CONTAINER
         Image: !Ref pBuildImageName
         PrivilegedMode: true
@@ -203,10 +196,7 @@ Resources:
           - Name: S3_BUCKET_NAME
             Type: PLAINTEXT
             Value: !Ref pSourceBucket
-          - Name: COXPH
-            Type: PLAINTEXT
-            Value: !Ref pCoxph
-      TimeoutInMinutes: 120
+      TimeoutInMinutes: 30
       LogsConfig:
         CloudWatchLogs:
           GroupName: !Sub "${pModelNamePrefix}-LogGroup-${pEnvironment}"
@@ -263,7 +253,9 @@ Resources:
                 RoleArn: !GetAtt
                   - CodePipelineServiceRole
                   - Arn
-                TemplatePath: 'Source::cfn/classification_pipeline.yaml'
+                TemplatePath: !Sub 
+                  - 'Source::${application}'
+                  - { application: !FindInMap [CoxMap, !Ref pCoxph, applstack] }
               RunOrder: 1
             
             - Name: InvokeStepFunc

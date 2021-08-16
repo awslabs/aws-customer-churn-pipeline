@@ -1,33 +1,18 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+###################################################################
+# This script builds the long living infrastructure for the project.
+# It creates S3 bucket and 3 cloudformation stacks related to- 
+# 1) Athena, 2) Glue and 3) application CI/CD pipeline.
+# It is created once at the initation of the churn application. 
+###################################################################
+
+#source environment variables
+source .env 
+
+#Create S3 bucket
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-REGION_DEFAULT=$(aws configure get region)
-STACK_NAME_DEFAULT=customer-churn-sagemaker-pipeline
-
-STACK_NAME=${1:-${STACK_NAME_DEFAULT}}
-S3_BUCKET_NAME=${2:-train-inference-pipeline-${ACCOUNT_ID}}
-REGION=${3:-${REGION_DEFAULT}}
-TIME_TO_EVENT=$4
-
-DATABASE=$S3_BUCKET_NAME
-
-case "$TIME_TO_EVENT" in 
-
-    "time")
-        TEMPLATE="https://${S3_BUCKET_NAME}.s3-${REGION}.amazonaws.com/cfn/time_to_event_pipeline.yaml"
-        echo $TEMPLATE
-    ;;
-    *)
-        #TEMPLATE="https://${S3_BUCKET_NAME}.s3-${REGION}.amazonaws.com/cfn/classification_pipeline.yaml"
-        TEMPLATE="https://${S3_BUCKET_NAME}.s3.amazonaws.com/cfn/classification_pipeline.yaml"
-        echo $TEMPLATE
-    ;;
-esac
-
-echo "stack name=${STACK_NAME}"
-echo "bucket name=${S3_BUCKET_NAME}"
-echo "region=${REGION}"
-echo "database=${DATABASE}"
-echo "template=${TEMPLATE}"
+S3_BUCKET_NAME=${S3_BUCKET_NAME}-${ACCOUNT_ID}
 
 if aws s3 ls "s3://${S3_BUCKET_NAME}" 2>&1 | grep -q 'NoSuchBucket'
 then
@@ -35,11 +20,15 @@ echo "S3 bucket does not exist. Creating..."
 aws s3api create-bucket --bucket ${S3_BUCKET_NAME} --region ${REGION}
 fi
 
-echo "Uploading local data to S3..."
+DATABASE=$S3_BUCKET_NAME
 
-aws s3 sync ./data s3://${S3_BUCKET_NAME}/demo/ > /dev/null
+echo "stack name=${STACK_NAME}"
+echo "bucket name=${S3_BUCKET_NAME}"
+echo "region=${REGION}"
+echo "database=${DATABASE}"
 
-echo "Building the Athena Workgroup..."
+# Create cfn stack 1 - Athena
+echo "01) Building the Athena Workgroup..."
 
 # will not run if primary workgroup already exists!
 aws cloudformation --region ${REGION} create-change-set --stack-name ${STACK_NAME}-athena \
@@ -47,11 +36,10 @@ aws cloudformation --region ${REGION} create-change-set --stack-name ${STACK_NAM
 --resources-to-import "[{\"ResourceType\":\"AWS::Athena::WorkGroup\",\"LogicalResourceId\":\"AthenaPrimaryWorkGroup\",\"ResourceIdentifier\":{\"Name\":\"primary\"}}]" \
 --template-body file://cfn/01-athena.yaml --parameters ParameterKey="DataBucketName",ParameterValue=${S3_BUCKET_NAME} > /dev/null
 
-sleep 15
-
 aws cloudformation --region ${REGION} execute-change-set --change-set-name ImportChangeSet --stack-name ${STACK_NAME}-athena > /dev/null
 
-echo "Building Glue resources..."
+# Create cfn stack 2 - Glue
+echo "02) Building Glue resources..."
 
 aws cloudformation --region ${REGION} create-stack \
 --stack-name ${STACK_NAME}-glue \
@@ -60,30 +48,25 @@ aws cloudformation --region ${REGION} create-stack \
 --parameters ParameterKey=RawDataBucketName,ParameterValue=${S3_BUCKET_NAME} \
 ParameterKey=CrawlerName,ParameterValue=crawler-${STACK_NAME} > /dev/null
 
-echo "Uploading Step Function Scripts to S3..."
-
-aws s3 sync ./scripts s3://${S3_BUCKET_NAME}/script/ > /dev/null
-
-aws s3 sync ./cfn/ s3://${S3_BUCKET_NAME}/cfn/ > /dev/null
-
 # need to wait for cloudformation to finish to kick off job
 sleep 45
 
 aws glue --region ${REGION} start-crawler --name crawler-${STACK_NAME} > /dev/null
 
-echo "Deploying Training and Inference Pipeline..."
+# Create cfn stack 3 - CI/CD pipeline
+echo "03) Building CI/CD pipeline..."
 
-aws cloudformation --region ${REGION}  create-stack \
---stack-name ${STACK_NAME}-pipeline \
---template-url "${TEMPLATE}" \
---capabilities CAPABILITY_NAMED_IAM \
---parameters ParameterKey=AthenaDatabaseName,ParameterValue=${DATABASE} \
-ParameterKey=PipelineBucketName,ParameterValue=${S3_BUCKET_NAME} \
---disable-rollback > /dev/null
-
-echo "Writing environment variables to delete the resources file"
-
-sed -i -e "s/your_region_name/${REGION}/g" delete_resources.sh
-sed -i -e "s/your_stack_name/${STACK_NAME}/g" delete_resources.sh
-
-rm -rf delete_resources.sh-e
+aws cloudformation deploy\
+    --template-file "cfn/03-CICDpipeline.yaml"\
+    --s3-bucket "$S3_BUCKET_NAME"\
+    --s3-prefix "codepipeline/churn"\
+    --region "$REGION"\
+    --stack-name "${STACK_NAME}-CICD"\
+    --parameter-overrides\
+    pEnvironment="dev"\
+    pSourceBucket="$S3_BUCKET_NAME" \
+    pBranchName="feature-CICD" \
+    pRegion="$REGION" \
+    pStackname="$STACK_NAME" \
+    pCoxph="$COXPH" \
+    --capabilities CAPABILITY_NAMED_IAM
