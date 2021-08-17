@@ -12,7 +12,6 @@ phases:
     commands:
       - aws s3 sync ./scripts s3://${S3_BUCKET_NAME}/script/ 
       - aws s3 sync ./cfn/ s3://${S3_BUCKET_NAME}/cfn/ 
-      - aws s3 sync ./data s3://${S3_BUCKET_NAME}/demo/ 
       - echo "Invoke step functions"
       - aws lambda invoke --function-name invokeTrainingStepFunction --region ${AWS_REGION} out
 

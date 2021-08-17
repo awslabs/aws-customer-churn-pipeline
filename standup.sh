@@ -36,7 +36,7 @@ aws cloudformation --region ${REGION} create-change-set --stack-name ${STACK_NAM
 --resources-to-import "[{\"ResourceType\":\"AWS::Athena::WorkGroup\",\"LogicalResourceId\":\"AthenaPrimaryWorkGroup\",\"ResourceIdentifier\":{\"Name\":\"primary\"}}]" \
 --template-body file://cfn/01-athena.yaml --parameters ParameterKey="DataBucketName",ParameterValue=${S3_BUCKET_NAME} > /dev/null
 
-sleep 15
+sleep 30
 
 aws cloudformation --region ${REGION} execute-change-set --change-set-name ImportChangeSet --stack-name ${STACK_NAME}-athena > /dev/null
 
@@ -52,6 +52,11 @@ ParameterKey=CrawlerName,ParameterValue=crawler-${STACK_NAME} > /dev/null
 
 # need to wait for cloudformation to finish to kick off job
 sleep 45
+
+# sync demo data to s3
+aws s3 sync ./data s3://${S3_BUCKET_NAME}/demo/ 
+# start glue crawler
+aws glue --region ${REGION} start-crawler --name crawler-${STACK_NAME} > /dev/null
 
 # Create cfn stack 3 - CI/CD pipeline
 echo "03) Building CI/CD pipeline..."
@@ -70,6 +75,3 @@ aws cloudformation deploy\
     pStackname="$STACK_NAME" \
     pCoxph="$COXPH" \
     --capabilities CAPABILITY_NAMED_IAM
-
-# start glue crawler
-aws glue --region ${REGION} start-crawler --name crawler-${STACK_NAME} > /dev/null
