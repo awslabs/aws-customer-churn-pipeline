@@ -48,6 +48,11 @@ To run with Cox proportional hazard modeling instead of binary logloss pass a 4t
 
 `./standup.sh <stack-name> <bucket-name> <region> true`
 
+Clustering or customer segmentation is enabled by default in each Cloud Formation cfn template.
+
+To disable it - go to cnf template and update the `ContainerArguments` under `SageMaker Training Step Preprocessing`, by setting '--cluster' to "False".
+
+
 ## [Read The Docs](https://awslabs.github.io/aws-customer-churn-pipeline/)
 
 [Documentation](https://awslabs.github.io/aws-customer-churn-pipeline/)
