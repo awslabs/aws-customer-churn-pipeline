@@ -6,24 +6,33 @@ import sys
 import warnings
 from typing import List, Tuple
 
+import numpy as np
+
 
 def install(package):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+    subprocess.check_call(
+        [sys.executable, "-m", "pip", "install", package],
+        # quietly
+        stdout=open(os.devnull, "wb"),
+    )
 
 
 install("scikit-learn==0.24.1")
-install("sklearn_pandas==2.1.0")
 install("awswrangler==2.4.0")
+os.system("conda install -c conda-forge hdbscan -y")
+install("Amazon-DenseClus==0.0.7")
 
 import awswrangler as wr
 import boto3
 import joblib
 import pandas as pd
+from denseclus import DenseClus
+from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import DataConversionWarning
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn_pandas import DataFrameMapper
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -58,7 +67,6 @@ target_col = "churn?"
 class_labels = ["True.", "False."]
 
 
-# TO DO: more elegant way of doing this
 def split_col_dtype(col_type: dict, target_label: str) -> Tuple[List[str], List[str]]:
     """Split columns into categorical and numerical lists
 
@@ -124,6 +132,18 @@ def main(args):
         )
     )
 
+    # no fit predict method currently supported for DenseClus
+    # See: https://github.com/awslabs/amazon-denseclus/issues/4
+    if args.cluster:
+
+        logger.info("Clustering data")
+        clf = DenseClus()
+        clf.fit(df)
+        logger.info("Clusters fit")
+
+        df["segments"] = clf.score()
+        df["segments"] = df["segments"].astype(str)
+
     split_ratio = args.train_test_split_ratio
     logger.info(f"Splitting data into train and test sets with ratio {split_ratio}")
     X_train, X_test, y_train, y_test = train_test_split(
@@ -134,34 +154,62 @@ def main(args):
     )
     logger.info(X_train.dtypes)
 
-    # TO DO: use sklearn column_transfomer
-    cat, num = split_col_dtype(col_type, target_col)
-    preprocess = DataFrameMapper(
-        [([col], [SimpleImputer(strategy="median"), StandardScaler()]) for col in num]
-        + [
-            (
-                [col],
-                [
-                    SimpleImputer(strategy="constant", fill_value="missing"),
-                    OneHotEncoder(handle_unknown="ignore"),
-                ],
-            )
-            for col in cat
+    numerical_idx = X_train.select_dtypes(
+        exclude=["object", "category"]
+    ).columns.tolist()
+
+    categorical_idx = X_train.select_dtypes(exclude=["float", "int"]).columns.tolist()
+
+    numeric_transformer = Pipeline(
+        steps=[
+            ("imputer", SimpleImputer(strategy="median")),
+            ("scaler", StandardScaler()),
         ]
-        + [],
-        df_out=True,
     )
+
+    categorical_transformer = Pipeline(
+        steps=[
+            ("imputer", SimpleImputer(strategy="constant", fill_value="missing")),
+            ("onehot", OneHotEncoder(sparse=False, handle_unknown="ignore")),
+        ]
+    )
+
+    preprocessor = ColumnTransformer(
+        [
+            ("numerical", numeric_transformer, numerical_idx),
+            ("categorical", categorical_transformer, categorical_idx),
+        ],
+        remainder="passthrough",
+    )
+
     logger.info("Running preprocessing and feature engineering transformations")
-    train_features = preprocess.fit_transform(X_train)
-    test_features = preprocess.transform(X_test)
+    train_features = preprocessor.fit_transform(X_train)
+    test_features = preprocessor.transform(X_test)
 
     preprocessor_output_path = os.path.join(
         "/opt/ml/processing/transformer", "preprocessor.joblib"
     )
-    joblib.dump(preprocess, preprocessor_output_path)
+    joblib.dump(preprocessor, preprocessor_output_path)
 
-    logger.info(f"Train data shape after preprocessing: {train_features.shape}")
-    logger.info(f"Test data shape after preprocessing: {test_features.shape}")
+    logger.info(f"train features size {train_features.shape}")
+    logger.info(f"test features size {test_features.shape}")
+
+    # adding back the target as the first columan for XGB
+    train_features = np.hstack((y_train.values.reshape(-1, 1), train_features))
+    test_features = np.hstack((y_test.values.reshape(-1, 1), test_features))
+
+    # getting the feature names
+    feature_names = (
+        numerical_idx
+        + preprocessor.transformers_[1][1]["onehot"].get_feature_names().tolist()
+    )
+
+    feature_names = [target_col] + feature_names
+
+    preprocessor_output_path = os.path.join(
+        "/opt/ml/processing/transformer", "preprocessor.joblib"
+    )
+    joblib.dump(preprocessor, preprocessor_output_path)
 
     train_features_output_path = os.path.join(
         "/opt/ml/processing/train", "train_features.csv"
@@ -172,12 +220,13 @@ def main(args):
     )
 
     logger.info(f"Saving training data to {train_features_output_path}")
-    pd.concat([y_train, train_features], axis=1).to_csv(
+
+    pd.DataFrame(train_features, columns=feature_names).to_csv(
         train_features_output_path, header=True, index=False
     )
 
     logger.info(f"Saving test data to {test_features_output_path}")
-    pd.concat([y_test, test_features], axis=1).to_csv(
+    pd.DataFrame(test_features, columns=feature_names).to_csv(
         test_features_output_path, header=True, index=False
     )
 
@@ -189,6 +238,12 @@ if __name__ == "__main__":
     parser.add_argument("--table", type=str, required=True)
     parser.add_argument("--train-test-split-ratio", type=float, default=0.25)
     parser.add_argument("--random-state", type=float, default=123)
+    parser.add_argument(
+        "--cluster",
+        default=False,
+        type=bool,
+        help="Run clusters as part of preprocessing",
+    )
     args = parser.parse_args()
 
     main(args)
