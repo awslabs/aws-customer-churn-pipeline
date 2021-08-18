@@ -37,17 +37,17 @@ It provides:
 
     # Step 3 - Update the pending Github connection manually in the console and release change in churn pipeline. This is a one time approval. 
   <p align="center">
-  <img src="images/UpdateConn.png" width="480" height="480" class="centerImage">
+  <img src="images/UpdateConn.png" width="899" class="centerImage">
   </p>
 
   <p align="center">
-  <img src="images/ReleaseChange.png" width="480" height="480" class="centerImage">
+  <img src="images/ReleaseChange.png" width="899" class="centerImage">
   </p>
 
     # Step 4 - Once the build succeeds, navigate to Step Functions to verify completion
 
     # Step 5 - Trigger Inference pipeline. This can be further scheduled based on cron jobs or S3 triggers as required. 
-    
+
     AWS_REGION=$(aws configure get region)
 
     aws lambda --region ${AWS_REGION} invoke --function-name invokeInferStepFunction --payload '{ "": ""}' out
