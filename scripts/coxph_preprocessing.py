@@ -42,6 +42,7 @@ col_type = {
     "state": "category",
     "account length": "int64",
     "area code": "str",
+    "phone": "str",
     "int'l plan": "category",
     "vmail plan": "category",
     "vmail message": "int64",
@@ -113,6 +114,7 @@ def main(args):
     del df["churn?"]
     df = df.rename(columns={"account length": "duration"})
 
+    df = df.drop(["area code", "phone"], 1)
     df = df.dropna()
     df = df.drop_duplicates()
 

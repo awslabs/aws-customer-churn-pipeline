@@ -30,6 +30,7 @@ col_type = {
     "state": "category",
     "account length": "int64",
     "area code": "str",
+    "phone": "str",
     "int'l plan": "category",
     "vmail plan": "category",
     "vmail message": "int64",
@@ -77,6 +78,8 @@ def main(args):
     df = df[columns]
     df = df.astype(col_type)
     logger.info(df.dtypes)
+
+    df = df.drop(["area code", "phone"], 1)
     df = df.dropna()
 
     if args.coxph:
