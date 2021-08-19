@@ -229,7 +229,7 @@ if __name__ == "__main__":
     parser.add_argument("--random-state", type=float, default=123)
     parser.add_argument(
         "--cluster",
-        default=False,
+        default=True,
         type=bool,
         help="Run clusters as part of preprocessing",
     )
