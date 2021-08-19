@@ -89,7 +89,7 @@ def main(args):
 
     # no fit predict method currently supported for DenseClus
     # See: https://github.com/awslabs/amazon-denseclus/issues/4
-    if args.cluster:        
+    if args.cluster:
 
         logger.info("Clustering data")
         clf = DenseClus()
