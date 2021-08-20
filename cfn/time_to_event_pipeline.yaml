@@ -12,6 +12,11 @@ Parameters:
     Type: String
     Default: "train-inference-pipeline"
 
+  MakeSegments:
+    Description: "Should clustering segemtnation be run in the pipeline?"
+    Type: String
+    Default: "True"
+
 Mappings:
   AWSRegionArch2DebuggerImageRegistry:
     af-south-1:
@@ -333,7 +338,7 @@ Resources:
                                 "--train-test-split-ratio",
                                 "0.2",
                                 "--cluster",
-                                "True"
+                                "${MakeSegments}"
                             ],
                             "ContainerEntrypoint": [
                                 "python3",
@@ -832,7 +837,9 @@ Resources:
                                 "--table",
                                 "infer",
                                 "--coxph",
-                                "True"
+                                "True",
+                                "--cluster",
+                                "${MakeSegments}"
                             ],
                             "ContainerEntrypoint": [
                                 "python3",

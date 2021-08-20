@@ -43,6 +43,7 @@ col_type = {
     "state": "category",
     "account length": "int64",
     "area code": "str",
+    "phone": "str",
     "int'l plan": "category",
     "vmail plan": "category",
     "vmail message": "int64",
@@ -118,6 +119,7 @@ def main(args):
     df = df.astype(col_type)
     logger.info(df.dtypes)
 
+    df = df.drop(["area code", "phone"], 1)
     df = df.dropna()
     df = df.drop_duplicates()
 
@@ -240,7 +242,7 @@ if __name__ == "__main__":
     parser.add_argument("--random-state", type=float, default=123)
     parser.add_argument(
         "--cluster",
-        default=False,
+        default=True,
         type=bool,
         help="Run clusters as part of preprocessing",
     )
