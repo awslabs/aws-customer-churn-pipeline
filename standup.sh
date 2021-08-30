@@ -60,7 +60,7 @@ aws s3 sync ./scripts s3://${S3_BUCKET_NAME}/script/ > /dev/null
 aws s3 sync ./cfn/ s3://${S3_BUCKET_NAME}/cfn/ > /dev/null
 
 # need to wait for cloudformation to finish to kick off job
-sleep 30
+sleep 45
 
 aws glue --region ${REGION} start-crawler --name crawler-${STACK_NAME} > /dev/null
 

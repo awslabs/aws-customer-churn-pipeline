@@ -46,7 +46,7 @@ It provides:
 
 To run with Cox proportional hazard modeling instead of binary logloss pass a 4th argument:
 
-`./standup.sh <stack-name> <bucket-name> <region> true`
+`./standup.sh <stack-name> <bucket-name> <region> time`
 
 Clustering or customer segmentation is enabled by default in each Cloud Formation cfn template.
 
