@@ -111,6 +111,7 @@ Resources:
                   - iam:*
                   - states:*
                   - cloudformation:*
+                  - lambda:*
                 Resource:
                   - "*"
 
