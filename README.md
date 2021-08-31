@@ -35,7 +35,7 @@ It provides:
     # Step 2 - Deploy infrastructure. 
     ./standup.sh
 
-    # Step 3 - Update the pending Github connection manually in the console and release change in churn pipeline. This is a one time approval. 
+    # Step 3 - Update the pending Github connection manually in the console, Developer Tools -> settings -> connections and release change in churn pipeline. This is a one time approval. 
   <p align="center">
   <img src="images/UpdateConn.png" width="899" class="centerImage">
   </p>
@@ -54,6 +54,10 @@ It provides:
 
     # Clean up
     ./delete_resources.sh
+    This does not delete the S3 bucket. In order to delete the bucket and the contents in it, run the below -
+    source .env
+    accountnum=$(aws sts get-caller-identity --query Account --output text)
+    aws s3 rb s3://${S3_BUCKET_NAME}-${accountnum}  --force
 
 ## [Read The Docs](https://awslabs.github.io/aws-customer-churn-pipeline/)
 
