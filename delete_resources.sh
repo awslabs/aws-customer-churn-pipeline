@@ -14,7 +14,5 @@ aws cloudformation delete-stack --stack-name ${stack_name}-pipeline --region ${r
 sleep 30
 aws cloudformation delete-stack --stack-name ${stack_name}-CICD --region ${region_name} 
 
-# delete S3 bucket and all data
-accountnum=$(aws sts get-caller-identity --query Account --output text)
-aws s3 rb s3://${S3_BUCKET_NAME}-${accountnum}  --force
+
 

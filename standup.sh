@@ -12,7 +12,7 @@ source .env
 
 #Create S3 bucket
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-S3_BUCKET_NAME=${S3_BUCKET_NAME}-${ACCOUNT_ID}
+S3_BUCKET_NAME=${S3_BUCKET_NAME}-${ACCOUNT_ID}-${REGION}
 
 DATABASE=$S3_BUCKET_NAME
 

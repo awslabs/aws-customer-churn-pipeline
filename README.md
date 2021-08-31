@@ -30,23 +30,24 @@ It provides:
 
 ## Quick Start
 
-    # Step 1 - Verify default parameters are in .env file. To run with Cox proportional hazard modeling instead of binary logloss set COXPH to 'positive'. 
+    # Step 1 - Modify default parameters in .env file as required. To run with Cox proportional hazard modeling instead of binary logloss set COXPH to 'positive'. 
 
     # Step 2 - Deploy infrastructure. 
     ./standup.sh
 
-    # Step 3 - Update the pending Github connection manually in the console, Developer Tools -> settings -> connections and release change in churn pipeline. This is a one time approval. 
+    # Step 3 - Update the pending Github connection manually in the console, Developer Tools -> settings -> connections. This is a one time approval. 
   <p align="center">
   <img src="images/UpdateConn.png" width="899" class="centerImage">
   </p>
 
+    # Step 4 - Release change in churn pipeline for the first time 
   <p align="center">
   <img src="images/ReleaseChange.png" width="899" class="centerImage">
   </p>
 
     # Step 4 - Once the build succeeds, navigate to Step Functions to verify completion
 
-    # Step 5 - Trigger Inference pipeline. This can be further scheduled based on cron jobs or S3 triggers as required. 
+    # Step 5 - Trigger Inference pipeline. Batch Inference can be automated using cron jobs or S3 triggers as per business needs. 
 
     AWS_REGION=$(aws configure get region)
 
@@ -57,7 +58,7 @@ It provides:
     This does not delete the S3 bucket. In order to delete the bucket and the contents in it, run the below -
     source .env
     accountnum=$(aws sts get-caller-identity --query Account --output text)
-    aws s3 rb s3://${S3_BUCKET_NAME}-${accountnum}  --force
+    aws s3 rb s3://${S3_BUCKET_NAME}-${accountnum}-${REGION}  --force
 
 ## [Read The Docs](https://awslabs.github.io/aws-customer-churn-pipeline/)
 
