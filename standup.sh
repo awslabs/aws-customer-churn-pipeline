@@ -14,18 +14,18 @@ source .env
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 S3_BUCKET_NAME=${S3_BUCKET_NAME}-${ACCOUNT_ID}
 
-if aws s3 ls "s3://${S3_BUCKET_NAME}" 2>&1 | grep -q 'NoSuchBucket'
-then
-echo "S3 bucket does not exist. Creating..."
-aws s3api create-bucket --bucket ${S3_BUCKET_NAME} --region ${REGION}
-fi
-
 DATABASE=$S3_BUCKET_NAME
 
 echo "stack name=${STACK_NAME}"
 echo "bucket name=${S3_BUCKET_NAME}"
 echo "region=${REGION}"
 echo "database=${DATABASE}"
+
+if aws s3 ls "s3://${S3_BUCKET_NAME}" 2>&1 | grep -q 'NoSuchBucket'
+then
+echo "S3 bucket does not exist. Creating..."
+aws s3api create-bucket --bucket ${S3_BUCKET_NAME} --region ${REGION}
+fi
 
 # Create cfn stack 1 - Athena
 echo "01) Building the Athena Workgroup..."
@@ -35,6 +35,8 @@ aws cloudformation --region ${REGION} create-change-set --stack-name ${STACK_NAM
 --change-set-name ImportChangeSet --change-set-type IMPORT \
 --resources-to-import "[{\"ResourceType\":\"AWS::Athena::WorkGroup\",\"LogicalResourceId\":\"AthenaPrimaryWorkGroup\",\"ResourceIdentifier\":{\"Name\":\"primary\"}}]" \
 --template-body file://cfn/01-athena.yaml --parameters ParameterKey="DataBucketName",ParameterValue=${S3_BUCKET_NAME} > /dev/null
+
+sleep 15
 
 aws cloudformation --region ${REGION} execute-change-set --change-set-name ImportChangeSet --stack-name ${STACK_NAME}-athena > /dev/null
 
@@ -50,8 +52,6 @@ ParameterKey=CrawlerName,ParameterValue=crawler-${STACK_NAME} > /dev/null
 
 # need to wait for cloudformation to finish to kick off job
 sleep 45
-
-aws glue --region ${REGION} start-crawler --name crawler-${STACK_NAME} > /dev/null
 
 # Create cfn stack 3 - CI/CD pipeline
 echo "03) Building CI/CD pipeline..."
@@ -70,3 +70,6 @@ aws cloudformation deploy\
     pStackname="$STACK_NAME" \
     pCoxph="$COXPH" \
     --capabilities CAPABILITY_NAMED_IAM
+
+# start glue crawler
+aws glue --region ${REGION} start-crawler --name crawler-${STACK_NAME} > /dev/null
