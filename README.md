@@ -30,32 +30,30 @@ It provides:
 
 ## Quick Start
 
-    # Default parameters are in .env file. To run with Cox proportional hazard modeling instead of binary logloss set COXPH to true. 
-    Deploy CICD pipeline.
-    sh CICD/deploy_infrastructure.sh
+    # Step 1 - Verify default parameters are in .env file. To run with Cox proportional hazard modeling instead of binary logloss set COXPH to 'positive'. 
 
-    # This creates a code Pipeline that will automatically deploy the application. For the first time, update the pending Github connection manually in the console and release change in churn pipeline. This is a one time approval. 
-    https://console.aws.amazon.com/codesuite/settings/connections
+    # Step 2 - Deploy infrastructure. 
+    ./standup.sh
 
+    # Step 3 - Update the pending Github connection manually in the console and release change in churn pipeline. This is a one time approval. 
+  <p align="center">
+  <img src="images/UpdateConn.png" width="480" height="480" class="centerImage">
+  </p>
+
+  <p align="center">
+  <img src="images/ReleaseChange.png" width="480" height="480" class="centerImage">
+  </p>
+
+    # Step 4 - Once the build succeeds, navigate to Step Functions to verify completion
+
+    # Step 5 - Trigger Inference pipeline. This can be further scheduled based on cron jobs or S3 triggers as required. 
+    
     AWS_REGION=$(aws configure get region)
 
-    # Trigger the training pipeline
-    aws lambda --region ${AWS_REGION} invoke --function-name invokeTrainingStepFunction --payload '{ "": ""}' out
-
-    # Trigger the inference pipeline
     aws lambda --region ${AWS_REGION} invoke --function-name invokeInferStepFunction --payload '{ "": ""}' out
 
     # Clean up
     ./delete_resources.sh
-
-To run with Cox proportional hazard modeling instead of binary logloss pass a 4th argument:
-
-`./standup.sh <stack-name> <bucket-name> <region> time`
-
-Clustering or customer segmentation is enabled by default in each Cloud Formation cfn template.
-
-To disable it - go to cnf template and update the `ContainerArguments` under `SageMaker Training Step Preprocessing`, by setting '--cluster' to "False".
-
 
 ## [Read The Docs](https://awslabs.github.io/aws-customer-churn-pipeline/)
 
