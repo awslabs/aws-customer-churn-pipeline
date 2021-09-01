@@ -70,7 +70,7 @@ aws cloudformation deploy\
     --parameter-overrides\
     pEnvironment="dev"\
     pSourceBucket="$S3_BUCKET_NAME" \
-    pBranchName="feature-CICD" \
+    pBranchName="main" \
     pRegion="$REGION" \
     pStackname="$STACK_NAME" \
     pCoxph="$COXPH" \
