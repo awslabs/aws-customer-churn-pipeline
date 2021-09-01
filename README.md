@@ -30,28 +30,35 @@ It provides:
 
 ## Quick Start
 
-    # Set up the resources
+    # Step 1 - Modify default parameters in .env file as required. To run with Cox proportional hazard modeling instead of binary logloss set COXPH to 'positive'. 
+
+    # Step 2 - Deploy infrastructure. 
     ./standup.sh
+
+    # Step 3 - Update the pending Github connection manually in the console, Developer Tools -> settings -> connections. This is a one time approval. 
+  <p align="center">
+  <img src="images/UpdateConn.png" width="899" class="centerImage">
+  </p>
+
+    # Step 4 - Release change in churn pipeline for the first time 
+  <p align="center">
+  <img src="images/ReleaseChange.png" width="899" class="centerImage">
+  </p>
+
+    # Step 4 - Once the build succeeds, navigate to Step Functions to verify completion
+
+    # Step 5 - Trigger Inference pipeline. Batch Inference can be automated using cron jobs or S3 triggers as per business needs. 
 
     AWS_REGION=$(aws configure get region)
 
-    # Trigger the training pipeline
-    aws lambda --region ${AWS_REGION} invoke --function-name invokeTrainingStepFunction --payload '{ "": ""}' out
-
-    # Trigger the inference pipeline
     aws lambda --region ${AWS_REGION} invoke --function-name invokeInferStepFunction --payload '{ "": ""}' out
 
     # Clean up
     ./delete_resources.sh
-
-To run with Cox proportional hazard modeling instead of binary logloss pass a 4th argument:
-
-`./standup.sh <stack-name> <bucket-name> <region> time`
-
-Clustering or customer segmentation is enabled by default in each Cloud Formation cfn template.
-
-To disable it - go to cnf template and update the `ContainerArguments` under `SageMaker Training Step Preprocessing`, by setting '--cluster' to "False".
-
+    This does not delete the S3 bucket. In order to delete the bucket and the contents in it, run the below -
+    source .env
+    accountnum=$(aws sts get-caller-identity --query Account --output text)
+    aws s3 rb s3://${S3_BUCKET_NAME}-${accountnum}-${REGION}  --force
 
 ## [Read The Docs](https://awslabs.github.io/aws-customer-churn-pipeline/)
 

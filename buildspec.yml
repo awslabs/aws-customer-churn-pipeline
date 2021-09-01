@@ -1,0 +1,18 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      python: 3.7
+    commands:
+      - echo "Installing awscli ..."
+      - pip install --upgrade awscli
+      - pip install boto3
+
+  build:
+    commands:
+      - aws s3 sync ./scripts s3://${S3_BUCKET_NAME}/script/ 
+      - aws s3 sync ./cfn/ s3://${S3_BUCKET_NAME}/cfn/ 
+      - echo "Invoke step functions"
+      - aws lambda invoke --function-name invokeTrainingStepFunction --region ${AWS_REGION} out
+
+
