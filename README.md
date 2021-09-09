@@ -32,7 +32,8 @@ It provides:
 
     # Step 1 - Modify default Parameters
 
-Update the .env file as required. To run with Cox proportional hazard modeling instead of binary logloss set COXPH to 'positive'.
+Update the `.env` file in the main directory. 
+To run with Cox proportional hazard modeling instead of binary logloss set COXPH to 'positive'.
 
 `S3_BUCKET_NAME="{YOU_BUCKET_NAME}"`\
 `REGION="{YOUR_REGION}"`\
