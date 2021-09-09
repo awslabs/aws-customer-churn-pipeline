@@ -63,6 +63,8 @@ To configure the [Github connection](https://docs.aws.amazon.com/codedeploy/late
 
 5. **Step 5** - Once the build succeeds, navigate to Step Functions to verify completion
 
+Note that as part of the build, it's going to run the Churn Training Pipeline.
+
 6. **Step 6**- Trigger Inference pipeline. Batch Inference can be automated using cron jobs or S3 triggers as per business needs.
 
 ```shell
