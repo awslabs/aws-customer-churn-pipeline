@@ -15,7 +15,7 @@ def install(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 
 
-install("xgboost")
+install("xgboost==1.3.3")
 install("smdebug==1.0.5")
 install("shap==0.39.0")
 install("matplotlib")
